@@ -8,21 +8,21 @@ import retrofit2.http.*
 
 interface OrderApi {
     
-    @GET("orders")
+    @GET("Orders")
     suspend fun getOrders(): Response<List<OrderDto>>
     
-    @GET("orders/{id}")
+    @GET("Orders/{id}")
     suspend fun getOrderById(@Path("id") id: String): Response<OrderDto>
     
-    @POST("orders")
+    @POST("Orders")
     suspend fun createOrder(@Body order: CreateOrderDto): Response<OrderDto>
     
-    @PUT("orders/{id}")
+    @PUT("Orders/{id}")
     suspend fun updateOrder(
         @Path("id") id: String, 
         @Body order: UpdateOrderDto
     ): Response<OrderDto>
     
-    @DELETE("orders/{id}")
+    @DELETE("Orders/{id}")
     suspend fun deleteOrder(@Path("id") id: String): Response<Unit>
 }

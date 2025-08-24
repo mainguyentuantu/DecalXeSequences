@@ -4,12 +4,14 @@ import com.example.decalxeandroid.data.api.CustomerApi
 import com.example.decalxeandroid.data.api.CustomerVehicleApi
 import com.example.decalxeandroid.data.api.DecalServiceApi
 import com.example.decalxeandroid.data.api.EmployeeApi
-import com.example.decalxeandroid.data.api.OrderApi
+import com.example.decalxeandroid.data.remote.OrderApiService
 import com.example.decalxeandroid.data.mapper.CustomerMapper
 import com.example.decalxeandroid.data.mapper.CustomerVehicleMapper
 import com.example.decalxeandroid.data.mapper.DecalServiceMapper
 import com.example.decalxeandroid.data.mapper.EmployeeMapper
 import com.example.decalxeandroid.data.mapper.OrderMapper
+import com.example.decalxeandroid.data.mapper.OrderDetailMapper
+import com.example.decalxeandroid.data.mapper.OrderStageHistoryMapper
 import com.example.decalxeandroid.data.repository.CustomerRepositoryImpl
 import com.example.decalxeandroid.data.repository.CustomerVehicleRepositoryImpl
 import com.example.decalxeandroid.data.repository.DecalServiceRepositoryImpl
@@ -41,6 +43,15 @@ object AppContainer {
     private val okHttpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
+            .addInterceptor { chain ->
+                val originalRequest = chain.request()
+                val requestWithUserAgent = originalRequest.newBuilder()
+                    .header("User-Agent", "DecalXeAndroid/1.0")
+                    .header("Accept", "application/json")
+                    .header("Content-Type", "application/json")
+                    .build()
+                chain.proceed(requestWithUserAgent)
+            }
             .build()
     }
     
@@ -66,8 +77,8 @@ object AppContainer {
         retrofit.create(EmployeeApi::class.java)
     }
     
-    private val orderApi: OrderApi by lazy {
-        retrofit.create(OrderApi::class.java)
+    private val orderApiService: OrderApiService by lazy {
+        retrofit.create(OrderApiService::class.java)
     }
     
     private val decalServiceApi: DecalServiceApi by lazy {
@@ -91,6 +102,14 @@ object AppContainer {
         OrderMapper()
     }
     
+    private val orderDetailMapper: OrderDetailMapper by lazy {
+        OrderDetailMapper()
+    }
+    
+    private val orderStageHistoryMapper: OrderStageHistoryMapper by lazy {
+        OrderStageHistoryMapper()
+    }
+    
     private val decalServiceMapper: DecalServiceMapper by lazy {
         DecalServiceMapper()
     }
@@ -109,7 +128,7 @@ object AppContainer {
     }
     
     val orderRepository: OrderRepository by lazy {
-        OrderRepositoryImpl(orderApi, orderMapper)
+        OrderRepositoryImpl(orderApiService, orderMapper, orderDetailMapper, orderStageHistoryMapper)
     }
     
     val decalServiceRepository: DecalServiceRepository by lazy {

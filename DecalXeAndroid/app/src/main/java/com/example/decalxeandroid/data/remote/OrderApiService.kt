@@ -13,7 +13,7 @@ interface OrderApiService {
     ): List<OrderDto>
     
     @GET("Orders/{id}")
-    suspend fun getOrderById(@Path("id") orderId: String): OrderDto
+    suspend fun getOrderById(@Path("id") orderId: String): retrofit2.Response<OrderDto>
     
     @GET("Orders/by-customer/{customerId}")
     suspend fun getOrdersByCustomer(@Path("customerId") customerId: String): List<OrderDto>

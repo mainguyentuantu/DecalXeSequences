@@ -19,8 +19,12 @@ import androidx.navigation.navArgument
 import com.example.decalxeandroid.presentation.navigation.Screen
 import com.example.decalxeandroid.presentation.customers.CustomersScreen
 import com.example.decalxeandroid.presentation.customers.AddCustomerScreen
+import com.example.decalxeandroid.presentation.customers.CustomerDetailScreen
 import com.example.decalxeandroid.presentation.orders.OrdersScreen
+import com.example.decalxeandroid.presentation.orders.OrderDetailScreen
+import com.example.decalxeandroid.presentation.orders.CreateOrderScreen
 import com.example.decalxeandroid.presentation.vehicles.VehiclesScreen
+import com.example.decalxeandroid.presentation.vehicles.AddVehicleScreen
 import com.example.decalxeandroid.presentation.services.ServicesScreen
 import com.example.decalxeandroid.presentation.profile.ProfileScreen
 import com.example.decalxeandroid.presentation.debug.ApiDebugScreen
@@ -148,7 +152,10 @@ fun DashboardNavHost(
         composable(Screen.Orders.route) {
             OrdersScreen(
                 onNavigateToOrderDetail = { orderId ->
-                    navController.navigate(Screen.OrderDetail.createRoute(orderId))
+                    println("DashboardScreen: Navigation to OrderDetail requested with orderId: '$orderId'")
+                    val route = Screen.OrderDetail.createRoute(orderId)
+                    println("DashboardScreen: Generated route: '$route'")
+                    navController.navigate(route)
                 },
                 onNavigateToCreateOrder = {
                     navController.navigate(Screen.CreateOrder.route)
@@ -189,13 +196,18 @@ fun DashboardNavHost(
             )
         ) { backStackEntry ->
             val customerId = backStackEntry.arguments?.getString("customerId") ?: ""
-            // Placeholder screen
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Chi tiết khách hàng: $customerId")
-            }
+            CustomerDetailScreen(
+                customerId = customerId,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToVehicle = { vehicleId ->
+                    navController.navigate(Screen.VehicleDetail.createRoute(vehicleId))
+                },
+                onNavigateToOrder = { orderId ->
+                    navController.navigate(Screen.OrderDetail.createRoute(orderId))
+                }
+            )
         }
         
         composable(
@@ -205,13 +217,24 @@ fun DashboardNavHost(
             )
         ) { backStackEntry ->
             val orderId = backStackEntry.arguments?.getString("orderId") ?: ""
-            // Placeholder screen
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Chi tiết đơn hàng: $orderId")
+            println("DashboardScreen: Navigating to OrderDetail with orderId: '$orderId'")
+            
+            if (orderId.isEmpty()) {
+                println("DashboardScreen: WARNING - orderId is empty!")
             }
+            
+            OrderDetailScreen(
+                orderId = orderId,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToCustomer = { customerId ->
+                    navController.navigate(Screen.CustomerDetail.createRoute(customerId))
+                },
+                onNavigateToVehicle = { vehicleId ->
+                    navController.navigate(Screen.VehicleDetail.createRoute(vehicleId))
+                }
+            )
         }
         
         composable(
@@ -244,23 +267,27 @@ fun DashboardNavHost(
         }
         
         composable(Screen.CreateOrder.route) {
-            // Placeholder screen
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Tạo đơn hàng")
-            }
+            CreateOrderScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onOrderCreated = { order ->
+                    // Navigate back to orders list
+                    navController.popBackStack()
+                }
+            )
         }
         
         composable(Screen.AddVehicle.route) {
-            // Placeholder screen
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Thêm xe")
-            }
+            AddVehicleScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onVehicleCreated = { vehicle ->
+                    // Navigate back to vehicles list
+                    navController.popBackStack()
+                }
+            )
         }
         
         composable(Screen.CreateService.route) {

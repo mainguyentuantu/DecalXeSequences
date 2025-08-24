@@ -119,7 +119,10 @@ fun OrdersScreen(
                         items(uiState.orders) { order ->
                             OrderCard(
                                 order = order,
-                                onClick = { onNavigateToOrderDetail(order.orderId) }
+                                onClick = { 
+                                    println("OrdersScreen: Clicking order with ID: '${order.orderId}'")
+                                    onNavigateToOrderDetail(order.orderId) 
+                                }
                             )
                         }
                     }

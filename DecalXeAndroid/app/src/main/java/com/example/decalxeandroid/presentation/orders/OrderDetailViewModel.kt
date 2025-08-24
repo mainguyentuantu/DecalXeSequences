@@ -26,14 +26,27 @@ class OrderDetailViewModel(
     
     fun loadOrder() {
         viewModelScope.launch {
+            println("OrderDetailViewModel: Starting to load order with ID: '$orderId'")
+            println("OrderDetailViewModel: OrderID length: ${orderId.length}")
+            println("OrderDetailViewModel: OrderID isEmpty: ${orderId.isEmpty()}")
+            println("OrderDetailViewModel: OrderID isBlank: ${orderId.isBlank()}")
+            
+            if (orderId.isEmpty() || orderId.isBlank()) {
+                println("OrderDetailViewModel: Invalid orderId - empty or blank")
+                _uiState.value = OrderDetailUiState.Error("ID đơn hàng không hợp lệ")
+                return@launch
+            }
+            
             _uiState.value = OrderDetailUiState.Loading
             
             try {
                 // Load order details
+                println("OrderDetailViewModel: Calling orderRepository.getOrderById($orderId)")
                 val orderResult = orderRepository.getOrderById(orderId)
                 orderResult.collect { result ->
                     when (result) {
                         is com.example.decalxeandroid.domain.model.Result.Success -> {
+                            println("OrderDetailViewModel: Successfully loaded order: ${result.data.orderId}")
                             val order = result.data
                             
                             // Load order details (services)

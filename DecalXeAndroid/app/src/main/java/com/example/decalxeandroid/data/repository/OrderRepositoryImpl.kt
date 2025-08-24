@@ -1,8 +1,10 @@
 package com.example.decalxeandroid.data.repository
 
-import com.example.decalxeandroid.data.api.OrderApi
+import com.example.decalxeandroid.data.remote.OrderApiService
 import com.example.decalxeandroid.data.dto.OrderDto
 import com.example.decalxeandroid.data.mapper.OrderMapper
+import com.example.decalxeandroid.data.mapper.OrderDetailMapper
+import com.example.decalxeandroid.data.mapper.OrderStageHistoryMapper
 import com.example.decalxeandroid.domain.model.Order
 import com.example.decalxeandroid.domain.model.OrderDetail
 import com.example.decalxeandroid.domain.model.OrderStageHistory
@@ -12,19 +14,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class OrderRepositoryImpl(
-    private val api: OrderApi,
-    private val mapper: OrderMapper
+    private val api: OrderApiService,
+    private val mapper: OrderMapper,
+    private val orderDetailMapper: OrderDetailMapper,
+    private val stageHistoryMapper: OrderStageHistoryMapper
 ) : OrderRepository {
 
     override fun getOrders(): Flow<Result<List<Order>>> = flow {
         try {
-            val response = api.getOrders()
-            if (response.isSuccessful) {
-                val orders = response.body()?.map { mapper.toDomain(it) } ?: emptyList()
-                emit(Result.Success(orders))
-            } else {
-                emit(Result.Error("Failed to fetch orders: ${response.code()}"))
-            }
+            val orders = api.getOrders()
+            val mappedOrders = orders.map { mapper.toDomain(it) }
+            emit(Result.Success(mappedOrders))
         } catch (e: Exception) {
             emit(Result.Error("Network error: ${e.message}"))
         }
@@ -32,32 +32,60 @@ class OrderRepositoryImpl(
 
     override fun getOrderById(orderId: String): Flow<Result<Order>> = flow {
         try {
+            println("OrderRepository: Getting order by ID: $orderId")
+            println("OrderRepository: API endpoint will be: Orders/$orderId")
+            println("OrderRepository: Full URL will be: ${BASE_URL}Orders/$orderId")
+            
             val response = api.getOrderById(orderId)
-            if (response.isSuccessful) {
-                val order = response.body()?.let { mapper.toDomain(it) }
-                if (order != null) {
-                    emit(Result.Success(order))
-                } else {
-                    emit(Result.Error("Order not found"))
+            
+            println("OrderRepository: Response code: ${response.code()}")
+            println("OrderRepository: Response message: ${response.message()}")
+            
+            when {
+                response.isSuccessful -> {
+                    val orderDto = response.body()
+                    if (orderDto != null) {
+                        println("OrderRepository: Successfully received OrderDto: ${orderDto.orderID}")
+                        val order = mapper.toDomain(orderDto)
+                        emit(Result.Success(order))
+                    } else {
+                        println("OrderRepository: Response body is null")
+                        emit(Result.Error("Dữ liệu đơn hàng trống"))
+                    }
                 }
-            } else {
-                emit(Result.Error("Failed to fetch order: ${response.code()}"))
+                response.code() == 404 -> {
+                    println("OrderRepository: 404 Not Found for order ID: $orderId")
+                    emit(Result.Error("Đơn hàng không tồn tại (ID: $orderId)"))
+                }
+                response.code() == 401 -> {
+                    println("OrderRepository: 401 Unauthorized")
+                    emit(Result.Error("Không có quyền truy cập đơn hàng"))
+                }
+                response.code() == 500 -> {
+                    println("OrderRepository: 500 Internal Server Error")
+                    emit(Result.Error("Lỗi máy chủ, vui lòng thử lại sau"))
+                }
+                else -> {
+                    println("OrderRepository: HTTP ${response.code()}: ${response.message()}")
+                    emit(Result.Error("Lỗi khi tải đơn hàng: HTTP ${response.code()}"))
+                }
             }
         } catch (e: Exception) {
-            emit(Result.Error("Network error: ${e.message}"))
+            println("OrderRepository: Exception getting order by ID $orderId: ${e.javaClass.simpleName}: ${e.message}")
+            e.printStackTrace()
+            emit(Result.Error("Lỗi kết nối: ${e.message}"))
         }
+    }
+    
+    companion object {
+        private const val BASE_URL = "https://decalxesequences-production.up.railway.app/api/"
     }
 
     override fun getOrdersByCustomerId(customerId: String): Flow<Result<List<Order>>> = flow {
         try {
-            val response = api.getOrders()
-            if (response.isSuccessful) {
-                val allOrders = response.body()?.map { mapper.toDomain(it) } ?: emptyList()
-                val customerOrders = allOrders.filter { it.customerId == customerId }
-                emit(Result.Success(customerOrders))
-            } else {
-                emit(Result.Error("Failed to fetch orders: ${response.code()}"))
-            }
+            val orders = api.getOrdersByCustomer(customerId)
+            val mappedOrders = orders.map { mapper.toDomain(it) }
+            emit(Result.Success(mappedOrders))
         } catch (e: Exception) {
             emit(Result.Error("Network error: ${e.message}"))
         }
@@ -65,14 +93,9 @@ class OrderRepositoryImpl(
 
     override fun getOrdersByVehicleId(vehicleId: String): Flow<Result<List<Order>>> = flow {
         try {
-            val response = api.getOrders()
-            if (response.isSuccessful) {
-                val allOrders = response.body()?.map { mapper.toDomain(it) } ?: emptyList()
-                val vehicleOrders = allOrders.filter { it.vehicleId == vehicleId }
-                emit(Result.Success(vehicleOrders))
-            } else {
-                emit(Result.Error("Failed to fetch orders: ${response.code()}"))
-            }
+            val orders = api.getOrdersByVehicle(vehicleId)
+            val mappedOrders = orders.map { mapper.toDomain(it) }
+            emit(Result.Success(mappedOrders))
         } catch (e: Exception) {
             emit(Result.Error("Network error: ${e.message}"))
         }
@@ -81,17 +104,9 @@ class OrderRepositoryImpl(
     override fun createOrder(order: Order): Flow<Result<Order>> = flow {
         try {
             val createDto = mapper.toCreateDto(order)
-            val response = api.createOrder(createDto)
-            if (response.isSuccessful) {
-                val createdOrder = response.body()?.let { mapper.toDomain(it) }
-                if (createdOrder != null) {
-                    emit(Result.Success(createdOrder))
-                } else {
-                    emit(Result.Error("Failed to create order: Invalid response"))
-                }
-            } else {
-                emit(Result.Error("Failed to create order: ${response.code()}"))
-            }
+            val createdOrderDto = api.createOrder(createDto)
+            val createdOrder = mapper.toDomain(createdOrderDto)
+            emit(Result.Success(createdOrder))
         } catch (e: Exception) {
             emit(Result.Error("Network error: ${e.message}"))
         }
@@ -100,17 +115,9 @@ class OrderRepositoryImpl(
     override fun updateOrder(orderId: String, order: Order): Flow<Result<Order>> = flow {
         try {
             val updateDto = mapper.toUpdateDto(order)
-            val response = api.updateOrder(orderId, updateDto)
-            if (response.isSuccessful) {
-                val updatedOrder = response.body()?.let { mapper.toDomain(it) }
-                if (updatedOrder != null) {
-                    emit(Result.Success(updatedOrder))
-                } else {
-                    emit(Result.Error("Failed to update order: Invalid response"))
-                }
-            } else {
-                emit(Result.Error("Failed to update order: ${response.code()}"))
-            }
+            val updatedOrderDto = api.updateOrder(orderId, updateDto)
+            val updatedOrder = mapper.toDomain(updatedOrderDto)
+            emit(Result.Success(updatedOrder))
         } catch (e: Exception) {
             emit(Result.Error("Network error: ${e.message}"))
         }
@@ -118,12 +125,8 @@ class OrderRepositoryImpl(
 
     override fun deleteOrder(orderId: String): Flow<Result<Boolean>> = flow {
         try {
-            val response = api.deleteOrder(orderId)
-            if (response.isSuccessful) {
-                emit(Result.Success(true))
-            } else {
-                emit(Result.Error("Failed to delete order: ${response.code()}"))
-            }
+            api.deleteOrder(orderId)
+            emit(Result.Success(true))
         } catch (e: Exception) {
             emit(Result.Error("Network error: ${e.message}"))
         }
@@ -131,19 +134,29 @@ class OrderRepositoryImpl(
 
     override fun getOrderDetails(orderId: String): Flow<Result<List<OrderDetail>>> = flow {
         try {
-            // Placeholder implementation - should call actual API endpoint
-            emit(Result.Success(emptyList()))
+            println("OrderRepository: Getting order details for order: $orderId")
+            val orderDetails = api.getOrderDetails(orderId)
+            val mappedDetails = orderDetails.map { orderDetailMapper.toDomain(it) }
+            println("OrderRepository: Successfully loaded ${mappedDetails.size} order details")
+            emit(Result.Success(mappedDetails))
         } catch (e: Exception) {
-            emit(Result.Error("Network error: ${e.message}"))
+            println("OrderRepository: Error getting order details for $orderId: ${e.message}")
+            // Return empty list instead of error to not break the main flow
+            emit(Result.Success(emptyList()))
         }
     }
 
     override fun getOrderStageHistory(orderId: String): Flow<Result<List<OrderStageHistory>>> = flow {
         try {
-            // Placeholder implementation - should call actual API endpoint
-            emit(Result.Success(emptyList()))
+            println("OrderRepository: Getting stage history for order: $orderId")
+            val stageHistory = api.getOrderStageHistory(orderId)
+            val mappedHistory = stageHistory.map { stageHistoryMapper.toDomain(it) }
+            println("OrderRepository: Successfully loaded ${mappedHistory.size} stage history records")
+            emit(Result.Success(mappedHistory))
         } catch (e: Exception) {
-            emit(Result.Error("Network error: ${e.message}"))
+            println("OrderRepository: Error getting stage history for $orderId: ${e.message}")
+            // Return empty list instead of error to not break the main flow
+            emit(Result.Success(emptyList()))
         }
     }
 }

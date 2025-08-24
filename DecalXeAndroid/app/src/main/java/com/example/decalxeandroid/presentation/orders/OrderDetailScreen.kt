@@ -119,6 +119,12 @@ fun OrderDetailScreen(
                             style = MaterialTheme.typography.bodyLarge,
                             color = Color.Red
                         )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "OrderID được truyền: $orderId",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                         Button(onClick = { viewModel.loadOrder() }) {
                             Text("Thử lại")
                         }
