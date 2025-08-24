@@ -1,0 +1,959 @@
+# MẪU JSON CHO TẤT CẢ MODELS TRONG DECALXE API
+# Dựa trên Swagger/OpenAPI Specification
+
+## 🔐 **Authentication Models**
+
+### **RegisterDto** (Đăng ký tài khoản)
+{
+  "username": "string",
+  "password": "string", 
+  "roleID": "string"
+}
+
+### **LoginDto** (Đăng nhập)
+{
+  "username": "string",
+  "password": "string"
+}
+
+### **LoginResponseDto** (Phản hồi đăng nhập)
+{
+  "accessToken": "string",
+  "refreshToken": "string",
+  "user": {
+    "accountID": "string",
+    "username": "string",
+    "email": "string",
+    "role": "string",
+    "accountRoleName": "string",
+    "isActive": true,
+    "employeeID": "string"
+  }
+}
+
+### **RefreshTokenDto** (Làm mới token)
+{
+  "refreshToken": "string"
+}
+
+### **LogoutDto** (Đăng xuất)
+{
+  "refreshToken": "string"
+}
+
+### **ChangePasswordRequestDto** (Đổi mật khẩu)
+{
+  "currentPassword": "string",
+  "newPassword": "string",
+  "confirmPassword": "string"
+}
+
+### **ResetPasswordByUsernameDto** (Đặt lại mật khẩu)
+{
+  "username": "string",
+  "newPassword": "string",
+  "confirmPassword": "string"
+}
+
+## 👥 **Account & Role Models**
+
+### **AccountDto** (Tài khoản)
+{
+  "accountID": "string",
+  "username": "string",
+  "email": "string",
+  "isActive": true,
+  "roleID": "string",
+  "roleName": "string"
+}
+
+### **UpdateAccountDto** (Cập nhật tài khoản)
+{
+  "username": "string",
+  "email": "string",
+  "isActive": true,
+  "roleID": "string"
+}
+
+### **RoleDto** (Vai trò)
+{
+  "roleID": "string",
+  "roleName": "string"
+}
+
+## 👨‍💼 **Employee Models**
+
+### **EmployeeDto** (Nhân viên)
+{
+  "employeeID": "string",
+  "firstName": "string",
+  "lastName": "string",
+  "phoneNumber": "string",
+  "email": "string",
+  "address": "string",
+  "storeID": "string",
+  "storeName": "string",
+  "accountID": "string",
+  "accountUsername": "string",
+  "accountRoleName": "string",
+  "isActive": true,
+  "roles": [
+    {
+      "roleID": "string",
+      "roleName": "string"
+    }
+  ],
+  "adminDetail": {
+    "adminDetailID": "string"
+  },
+  "managerDetail": {
+    "managerDetailID": "string"
+  },
+  "salesPersonDetail": {
+    "salesPersonDetailID": "string"
+  },
+  "designerDetail": {
+    "designerDetailID": "string"
+  },
+  "technicianDetail": {
+    "technicianDetailID": "string"
+  }
+}
+
+### **CreateEmployeeDto** (Tạo nhân viên)
+{
+  "firstName": "string",
+  "lastName": "string",
+  "phoneNumber": "string",
+  "email": "string",
+  "address": "string",
+  "storeID": "string",
+  "accountID": "string"
+}
+
+### **UpdateEmployeeDto** (Cập nhật nhân viên)
+{
+  "firstName": "string",
+  "lastName": "string",
+  "phoneNumber": "string",
+  "email": "string",
+  "address": "string",
+  "storeID": "string",
+  "accountID": "string"
+}
+
+### **UpdateEmployeeStatusDto** (Cập nhật trạng thái nhân viên)
+{
+  "isActive": true
+}
+
+## 👤 **Customer Models**
+
+### **CustomerDto** (Khách hàng)
+{
+  "customerID": "string",
+  "firstName": "string",
+  "lastName": "string",
+  "phoneNumber": "string",
+  "email": "string",
+  "address": "string",
+  "accountID": "string",
+  "accountUsername": "string"
+}
+
+### **CreateCustomerDto** (Tạo khách hàng)
+{
+  "firstName": "string",
+  "lastName": "string",
+  "phoneNumber": "string",
+  "email": "string",
+  "address": "string",
+  "accountID": "string"
+}
+
+### **UpdateCustomerDto** (Cập nhật khách hàng)
+{
+  "firstName": "string",
+  "lastName": "string",
+  "phoneNumber": "string",
+  "email": "string",
+  "address": "string",
+  "accountID": "string"
+}
+
+## 🚗 **Vehicle Models**
+
+### **CustomerVehicleDto** (Xe khách hàng)
+{
+  "vehicleID": "string",
+  "customerID": "string",
+  "customerFullName": "string",
+  "chassisNumber": "string",
+  "licensePlate": "string",
+  "color": "string",
+  "year": 0,
+  "initialKM": 0.0,
+  "modelID": "string",
+  "modelName": "string",
+  "brandName": "string"
+}
+
+### **CreateCustomerVehicleDto** (Tạo xe khách hàng)
+{
+  "customerID": "string",
+  "chassisNumber": "string",
+  "licensePlate": "string",
+  "color": "string",
+  "year": 0,
+  "initialKM": 0.0,
+  "modelID": "string"
+}
+
+### **UpdateCustomerVehicleDto** (Cập nhật xe khách hàng)
+{
+  "customerID": "string",
+  "chassisNumber": "string",
+  "licensePlate": "string",
+  "color": "string",
+  "year": 0,
+  "initialKM": 0.0,
+  "modelID": "string"
+}
+
+### **VehicleBrandDto** (Thương hiệu xe)
+{
+  "brandID": "string",
+  "brandName": "string"
+}
+
+### **VehicleModelDto** (Mẫu xe)
+{
+  "modelID": "string",
+  "modelName": "string",
+  "description": "string",
+  "brandID": "string",
+  "brandName": "string"
+}
+
+### **CreateVehicleModelDto** (Tạo mẫu xe)
+{
+  "modelName": "string",
+  "description": "string",
+  "chassisNumber": "string",
+  "vehicleType": "string",
+  "brandID": "string"
+}
+
+### **UpdateVehicleModelDto** (Cập nhật mẫu xe)
+{
+  "modelName": "string",
+  "description": "string",
+  "chassisNumber": "string",
+  "vehicleType": "string",
+  "brandID": "string"
+}
+
+## 📋 **Order Models**
+
+### **OrderDto** (Đơn hàng)
+{
+  "orderID": "string",
+  "orderDate": "2024-01-01T00:00:00",
+  "totalAmount": 0.0,
+  "orderStatus": "string",
+  "assignedEmployeeID": "string",
+  "assignedEmployeeFullName": "string",
+  "vehicleID": "string",
+  "chassisNumber": "string",
+  "vehicleModelName": "string",
+  "vehicleBrandName": "string",
+  "expectedArrivalTime": "2024-01-01T00:00:00",
+  "currentStage": "string",
+  "priority": "string",
+  "isCustomDecal": true,
+  "storeID": "string",
+  "description": "string",
+  "customerID": "string",
+  "customerFullName": "string",
+  "customerPhoneNumber": "string",
+  "customerEmail": "string",
+  "customerAddress": "string",
+  "accountID": "string",
+  "accountUsername": "string",
+  "accountCreated": true
+}
+
+### **CreateOrderDto** (Tạo đơn hàng)
+{
+  "totalAmount": 0.0,
+  "assignedEmployeeID": "string",
+  "vehicleID": "string",
+  "expectedArrivalTime": "2024-01-01T00:00:00",
+  "priority": "string",
+  "isCustomDecal": true,
+  "description": "string"
+}
+
+### **CreateOrderWithCustomerDto** (Tạo đơn hàng với khách hàng)
+{
+  "totalAmount": 0.0,
+  "assignedEmployeeID": "string",
+  "vehicleID": "string",
+  "expectedArrivalTime": "2024-01-01T00:00:00",
+  "priority": "string",
+  "isCustomDecal": true,
+  "description": "string",
+  "existingCustomerID": "string",
+  "newCustomerPayload": {
+    "firstName": "string",
+    "lastName": "string",
+    "phoneNumber": "string",
+    "email": "string",
+    "address": "string",
+    "createAccount": true
+  }
+}
+
+### **UpdateOrderDto** (Cập nhật đơn hàng)
+{
+  "totalAmount": 0.0,
+  "assignedEmployeeID": "string",
+  "vehicleID": "string",
+  "expectedArrivalTime": "2024-01-01T00:00:00",
+  "priority": "string",
+  "isCustomDecal": true,
+  "description": "string"
+}
+
+### **OrderDetailDto** (Chi tiết đơn hàng)
+{
+  "orderDetailID": "string",
+  "orderID": "string",
+  "serviceID": "string",
+  "serviceName": "string",
+  "quantity": 0,
+  "unitPrice": 0.0,
+  "totalPrice": 0.0,
+  "description": "string"
+}
+
+### **CreateOrderDetailDto** (Tạo chi tiết đơn hàng)
+{
+  "serviceID": "string",
+  "quantity": 0,
+  "unitPrice": 0.0,
+  "description": "string"
+}
+
+### **UpdateOrderDetailDto** (Cập nhật chi tiết đơn hàng)
+{
+  "serviceID": "string",
+  "quantity": 0,
+  "unitPrice": 0.0,
+  "description": "string"
+}
+
+### **OrderTrackingDto** (Theo dõi đơn hàng)
+{
+  "orderID": "string",
+  "orderDate": "2024-01-01T00:00:00",
+  "orderStatus": "string",
+  "currentStage": "string",
+  "totalAmount": 0.0,
+  "customerFullName": "string",
+  "customerPhoneNumber": "string",
+  "assignedEmployeeFullName": "string",
+  "stageHistory": [
+    {
+      "stageHistoryID": "string",
+      "orderID": "string",
+      "stageName": "string",
+      "stageDescription": "string",
+      "startDate": "2024-01-01T00:00:00",
+      "endDate": "2024-01-01T00:00:00",
+      "assignedEmployeeID": "string",
+      "assignedEmployeeFullName": "string",
+      "notes": "string"
+    }
+  ]
+}
+
+### **OrderCreateFormDataDto** (Dữ liệu form tạo đơn hàng)
+{
+  "customers": [
+    {
+      "customerID": "string",
+      "firstName": "string",
+      "lastName": "string",
+      "phoneNumber": "string"
+    }
+  ],
+  "services": [
+    {
+      "serviceID": "string",
+      "serviceName": "string",
+      "price": 0.0
+    }
+  ],
+  "employees": [
+    {
+      "employeeID": "string",
+      "firstName": "string",
+      "lastName": "string"
+    }
+  ]
+}
+
+### **OrderWithCustomerResponseDto** (Phản hồi tạo đơn hàng với khách hàng)
+{
+  "orderID": "string",
+  "orderDate": "2024-01-01T00:00:00",
+  "orderStatus": "string",
+  "currentStage": "string",
+  "totalAmount": 0.0,
+  "assignedEmployeeID": "string",
+  "assignedEmployeeFullName": "string",
+  "vehicleID": "string",
+  "vehicleModelName": "string",
+  "vehicleBrandName": "string",
+  "chassisNumber": "string",
+  "expectedArrivalTime": "2024-01-01T00:00:00",
+  "priority": "string",
+  "isCustomDecal": true,
+  "description": "string",
+  "customerID": "string",
+  "customerFullName": "string",
+  "customerPhoneNumber": "string",
+  "customerEmail": "string",
+  "customerAddress": "string",
+  "accountID": "string",
+  "accountUsername": "string",
+  "accountCreated": true,
+  "generatedPassword": "string",
+  "message": "string"
+}
+
+### **OrderStageHistoryDto** (Lịch sử giai đoạn đơn hàng)
+{
+  "stageHistoryID": "string",
+  "orderID": "string",
+  "stageName": "string",
+  "stageDescription": "string",
+  "startDate": "2024-01-01T00:00:00",
+  "endDate": "2024-01-01T00:00:00",
+  "assignedEmployeeID": "string",
+  "assignedEmployeeFullName": "string",
+  "notes": "string"
+}
+
+### **CreateOrderStageHistoryDto** (Tạo lịch sử giai đoạn đơn hàng)
+{
+  "orderID": "string",
+  "stageName": "string",
+  "stageDescription": "string",
+  "startDate": "2024-01-01T00:00:00",
+  "endDate": "2024-01-01T00:00:00",
+  "assignedEmployeeID": "string",
+  "notes": "string"
+}
+
+### **UpdateOrderStageHistoryDto** (Cập nhật lịch sử giai đoạn đơn hàng)
+{
+  "stageName": "string",
+  "stageDescription": "string",
+  "startDate": "2024-01-01T00:00:00",
+  "endDate": "2024-01-01T00:00:00",
+  "assignedEmployeeID": "string",
+  "notes": "string"
+}
+
+## 🎨 **Design Models**
+
+### **DesignDto** (Thiết kế)
+{
+  "designID": "string",
+  "designURL": "string",
+  "designerID": "string",
+  "designerFullName": "string",
+  "version": "string",
+  "approvalStatus": "string",
+  "isAIGenerated": true,
+  "aiModelUsed": "string",
+  "designPrice": 0.0,
+  "size": "string",
+  "templateItems": [
+    {
+      "templateItemID": "string",
+      "designID": "string",
+      "decalTemplateID": "string",
+      "decalTemplateName": "string",
+      "position": "string",
+      "size": "string",
+      "color": "string",
+      "quantity": 0
+    }
+  ]
+}
+
+### **CreateDesignDto** (Tạo thiết kế)
+{
+  "designURL": "string",
+  "designerID": "string",
+  "version": "string",
+  "approvalStatus": "string",
+  "isAIGenerated": true,
+  "aiModelUsed": "string",
+  "designPrice": 0.0,
+  "size": "string"
+}
+
+### **UpdateDesignDto** (Cập nhật thiết kế)
+{
+  "designURL": "string",
+  "designerID": "string",
+  "version": "string",
+  "approvalStatus": "string",
+  "isAIGenerated": true,
+  "aiModelUsed": "string",
+  "designPrice": 0.0,
+  "size": "string"
+}
+
+### **DesignCommentDto** (Bình luận thiết kế)
+{
+  "commentID": "string",
+  "designID": "string",
+  "commenterID": "string",
+  "commenterFullName": "string",
+  "commentText": "string",
+  "commentDate": "2024-01-01T00:00:00"
+}
+
+### **CreateDesignCommentDto** (Tạo bình luận thiết kế)
+{
+  "designID": "string",
+  "commenterID": "string",
+  "commentText": "string"
+}
+
+### **UpdateDesignCommentDto** (Cập nhật bình luận thiết kế)
+{
+  "commentText": "string"
+}
+
+### **DesignTemplateItemDto** (Item mẫu thiết kế)
+{
+  "templateItemID": "string",
+  "designID": "string",
+  "decalTemplateID": "string",
+  "decalTemplateName": "string",
+  "position": "string",
+  "size": "string",
+  "color": "string",
+  "quantity": 0
+}
+
+### **CreateDesignTemplateItemDto** (Tạo item mẫu thiết kế)
+{
+  "designID": "string",
+  "decalTemplateID": "string",
+  "position": "string",
+  "size": "string",
+  "color": "string",
+  "quantity": 0
+}
+
+### **UpdateDesignTemplateItemDto** (Cập nhật item mẫu thiết kế)
+{
+  "decalTemplateID": "string",
+  "position": "string",
+  "size": "string",
+  "color": "string",
+  "quantity": 0
+}
+
+### **DesignWorkOrderDto** (Đơn hàng thiết kế)
+{
+  "workOrderID": "string",
+  "designID": "string",
+  "assignedDesignerID": "string",
+  "status": "string",
+  "dueDate": "2024-01-01T00:00:00"
+}
+
+### **CreateDesignWorkOrderDto** (Tạo đơn hàng thiết kế)
+{
+  "designID": "string",
+  "assignedDesignerID": "string",
+  "status": "string",
+  "dueDate": "2024-01-01T00:00:00"
+}
+
+### **UpdateDesignWorkOrderDto** (Cập nhật đơn hàng thiết kế)
+{
+  "assignedDesignerID": "string",
+  "status": "string",
+  "dueDate": "2024-01-01T00:00:00"
+}
+
+## 🏪 **Service Models**
+
+### **DecalServiceDto** (Dịch vụ decal)
+{
+  "serviceID": "string",
+  "serviceName": "string",
+  "description": "string",
+  "price": 0.0,
+  "standardWorkUnits": 0,
+  "decalTemplateID": "string",
+  "decalTemplateName": "string",
+  "decalTypeName": "string"
+}
+
+### **CreateDecalServiceDto** (Tạo dịch vụ decal)
+{
+  "serviceName": "string",
+  "description": "string",
+  "price": 0.0,
+  "standardWorkUnits": 0,
+  "decalTemplateID": "string"
+}
+
+### **UpdateDecalServiceDto** (Cập nhật dịch vụ decal)
+{
+  "serviceName": "string",
+  "description": "string",
+  "price": 0.0,
+  "standardWorkUnits": 0,
+  "decalTemplateID": "string"
+}
+
+### **DecalTemplateDto** (Mẫu decal)
+{
+  "templateID": "string",
+  "templateName": "string",
+  "decalTypeID": "string"
+}
+
+### **CreateDecalTemplateDto** (Tạo mẫu decal)
+{
+  "templateName": "string",
+  "decalTypeID": "string"
+}
+
+### **UpdateDecalTemplateDto** (Cập nhật mẫu decal)
+{
+  "templateName": "string",
+  "decalTypeID": "string"
+}
+
+### **DecalTypeDto** (Loại decal)
+{
+  "decalTypeID": "string",
+  "decalTypeName": "string"
+}
+
+### **CreateDecalTypeDto** (Tạo loại decal)
+{
+  "decalTypeName": "string",
+  "description": "string",
+  "basePrice": 0.0,
+  "materialType": "string"
+}
+
+### **UpdateDecalTypeDto** (Cập nhật loại decal)
+{
+  "decalTypeName": "string",
+  "description": "string",
+  "basePrice": 0.0,
+  "materialType": "string"
+}
+
+### **VehicleModelDecalTemplateDto** (Mẫu decal cho mẫu xe)
+{
+  "modelID": "string",
+  "templateID": "string",
+  "templateName": "string",
+  "decalTypeName": "string",
+  "isCompatible": true
+}
+
+### **VehicleModelDecalTypeDto** (Loại decal cho mẫu xe)
+{
+  "modelID": "string",
+  "decalTypeID": "string",
+  "decalTypeName": "string",
+  "price": 0.0,
+  "isCompatible": true
+}
+
+### **UpdateVehicleDecalTypePriceDto** (Cập nhật giá loại decal cho mẫu xe)
+{
+  "price": 0.0
+}
+
+### **AssignDecalTypeToVehicleDto** (Gán loại decal cho xe)
+{
+  "modelID": "string",
+  "decalTypeID": "string",
+  "price": 0.0
+}
+
+## 💰 **Payment & Financial Models**
+
+### **PaymentDto** (Thanh toán)
+{
+  "paymentID": "string",
+  "orderID": "string",
+  "paymentDate": "2024-01-01T00:00:00",
+  "paymentAmount": 0.0,
+  "paymentMethod": "string",
+  "paymentStatus": "string",
+  "transactionID": "string",
+  "notes": "string"
+}
+
+### **CreatePaymentDto** (Tạo thanh toán)
+{
+  "orderID": "string",
+  "paymentDate": "2024-01-01T00:00:00",
+  "paymentAmount": 0.0,
+  "paymentMethod": "string",
+  "paymentStatus": "string",
+  "transactionID": "string",
+  "notes": "string"
+}
+
+### **UpdatePaymentDto** (Cập nhật thanh toán)
+{
+  "paymentStatus": "string"
+}
+
+### **DepositDto** (Đặt cọc)
+{
+  "depositID": "string",
+  "orderID": "string",
+  "depositAmount": 0.0,
+  "depositDate": "2024-01-01T00:00:00",
+  "depositMethod": "string",
+  "depositStatus": "string",
+  "notes": "string"
+}
+
+### **CreateDepositDto** (Tạo đặt cọc)
+{
+  "orderID": "string",
+  "depositAmount": 0.0,
+  "depositDate": "2024-01-01T00:00:00",
+  "depositMethod": "string",
+  "depositStatus": "string",
+  "notes": "string"
+}
+
+## 🏪 **Store Models**
+
+### **StoreDto** (Cửa hàng)
+{
+  "storeID": "string",
+  "storeName": "string",
+  "address": "string",
+  "phoneNumber": "string",
+  "email": "string",
+  "managerID": "string",
+  "managerFullName": "string",
+  "isActive": true
+}
+
+### **CreateStoreDto** (Tạo cửa hàng)
+{
+  "storeName": "string",
+  "address": "string",
+  "phoneNumber": "string",
+  "email": "string",
+  "managerID": "string"
+}
+
+### **UpdateStoreDto** (Cập nhật cửa hàng)
+{
+  "storeName": "string",
+  "address": "string",
+  "phoneNumber": "string",
+  "email": "string",
+  "managerID": "string"
+}
+
+## 🔧 **Technical Models**
+
+### **TechLaborPriceDto** (Giá nhân công kỹ thuật)
+{
+  "laborPriceID": "string",
+  "serviceID": "string",
+  "serviceName": "string",
+  "laborPrice": 0.0,
+  "effectiveDate": "2024-01-01T00:00:00"
+}
+
+### **CreateTechLaborPriceDto** (Tạo giá nhân công kỹ thuật)
+{
+  "serviceID": "string",
+  "laborPrice": 0.0,
+  "effectiveDate": "2024-01-01T00:00:00"
+}
+
+### **UpdateTechLaborPriceDto** (Cập nhật giá nhân công kỹ thuật)
+{
+  "laborPrice": 0.0
+}
+
+## 📋 **Warranty Models**
+
+### **WarrantyDto** (Bảo hành)
+{
+  "warrantyID": "string",
+  "orderID": "string",
+  "warrantyStartDate": "2024-01-01T00:00:00",
+  "warrantyEndDate": "2024-01-01T00:00:00",
+  "warrantyDuration": 0,
+  "warrantyTerms": "string",
+  "warrantyStatus": "string",
+  "customerID": "string",
+  "customerFullName": "string",
+  "vehicleID": "string",
+  "chassisNumber": "string"
+}
+
+### **CreateWarrantyDto** (Tạo bảo hành)
+{
+  "orderID": "string",
+  "warrantyStartDate": "2024-01-01T00:00:00",
+  "warrantyDuration": 0,
+  "warrantyTerms": "string",
+  "warrantyStatus": "string"
+}
+
+### **UpdateWarrantyDto** (Cập nhật bảo hành)
+{
+  "warrantyStartDate": "2024-01-01T00:00:00",
+  "warrantyDuration": 0,
+  "warrantyTerms": "string",
+  "warrantyStatus": "string"
+}
+
+## 📊 **Statistics Models**
+
+### **ServiceStatisticsDto** (Thống kê dịch vụ)
+{
+  "totalServices": 0,
+  "activeServices": 0,
+  "totalRevenue": 0.0,
+  "averageServicePrice": 0.0,
+  "topServices": [
+    {
+      "serviceID": "string",
+      "serviceName": "string",
+      "orderCount": 0,
+      "totalRevenue": 0.0
+    }
+  ],
+  "serviceCategories": [
+    {
+      "category": "string",
+      "count": 0,
+      "totalRevenue": 0.0
+    }
+  ],
+  "monthlyRevenue": [
+    {
+      "month": "string",
+      "revenue": 0.0,
+      "orderCount": 0
+    }
+  ]
+}
+
+### **SalesStatisticsDto** (Thống kê bán hàng)
+{
+  "totalOrders": 0,
+  "totalRevenue": 0.0,
+  "averageOrderValue": 0.0
+}
+
+## 📝 **Feedback Models**
+
+### **FeedbackDto** (Phản hồi)
+{
+  "feedbackID": "string",
+  "orderID": "string",
+  "customerID": "string",
+  "customerFullName": "string",
+  "rating": 0,
+  "comment": "string",
+  "feedbackDate": "2024-01-01T00:00:00"
+}
+
+### **CreateFeedbackDto** (Tạo phản hồi)
+{
+  "orderID": "string",
+  "customerID": "string",
+  "rating": 0,
+  "comment": "string"
+}
+
+### **UpdateFeedbackDto** (Cập nhật phản hồi)
+{
+  "rating": 0,
+  "comment": "string"
+}
+
+## ⏰ **Scheduling Models**
+
+### **ScheduledWorkUnitDto** (Đơn vị công việc đã lên lịch)
+{
+  "workUnitID": "string",
+  "orderID": "string",
+  "serviceID": "string",
+  "serviceName": "string",
+  "assignedTechnicianID": "string",
+  "assignedTechnicianName": "string",
+  "scheduledStartTime": "2024-01-01T00:00:00",
+  "scheduledEndTime": "2024-01-01T00:00:00",
+  "workStatus": "string"
+}
+
+## 👥 **Role Detail Models**
+
+### **AdminDetailDto** (Chi tiết admin)
+{
+  "adminDetailID": "string"
+}
+
+### **ManagerDetailDto** (Chi tiết quản lý)
+{
+  "managerDetailID": "string"
+}
+
+### **SalesPersonDetailDto** (Chi tiết nhân viên bán hàng)
+{
+  "salesPersonDetailID": "string"
+}
+
+### **DesignerDetailDto** (Chi tiết thiết kế)
+{
+  "designerDetailID": "string"
+}
+
+### **TechnicianDetailDto** (Chi tiết kỹ thuật viên)
+{
+  "technicianDetailID": "string"
+}
+
+---
+
+# GHI CHÚ:
+# - Tất cả các mẫu JSON này được tạo dựa trên Swagger/OpenAPI specification của DecalXeAPI
+# - Các trường có kiểu dữ liệu "string" có thể chứa bất kỳ chuỗi ký tự nào
+# - Các trường có kiểu dữ liệu số (int, decimal) có thể chứa giá trị số tương ứng
+# - Các trường có kiểu dữ liệu boolean chỉ nhận giá trị true hoặc false
+# - Các trường có kiểu dữ liệu DateTime được định dạng theo chuẩn ISO 8601
+# - Các trường có dấu ? là nullable (có thể null)
+# - Các mảng được đánh dấu bằng dấu ngoặc vuông []
