@@ -8,21 +8,21 @@ import retrofit2.http.*
 
 interface DecalServiceApi {
     
-    @GET("services")
+    @GET("DecalServices")
     suspend fun getDecalServices(): Response<List<DecalServiceDto>>
     
-    @GET("services/{id}")
+    @GET("DecalServices/{id}")
     suspend fun getDecalServiceById(@Path("id") id: String): Response<DecalServiceDto>
     
-    @POST("services")
+    @POST("DecalServices")
     suspend fun createDecalService(@Body service: CreateDecalServiceDto): Response<DecalServiceDto>
     
-    @PUT("services/{id}")
+    @PUT("DecalServices/{id}")
     suspend fun updateDecalService(
         @Path("id") id: String, 
         @Body service: UpdateDecalServiceDto
     ): Response<DecalServiceDto>
     
-    @DELETE("services/{id}")
+    @DELETE("DecalServices/{id}")
     suspend fun deleteDecalService(@Path("id") id: String): Response<Unit>
 }

@@ -15,11 +15,17 @@ class DecalServiceRepositoryImpl(
         return try {
             val response = api.getDecalServices()
             if (response.isSuccessful) {
-                response.body()?.map { mapper.toDomain(it) } ?: emptyList()
+                val services = response.body()?.map { mapper.toDomain(it) } ?: emptyList()
+                println("DecalServices API: Successfully loaded ${services.size} services")
+                services
             } else {
+                val errorBody = response.errorBody()?.string()
+                println("DecalServices API Error: ${response.code()} - $errorBody")
                 emptyList()
             }
         } catch (e: Exception) {
+            println("DecalServices API Exception: ${e.message}")
+            e.printStackTrace()
             emptyList()
         }
     }

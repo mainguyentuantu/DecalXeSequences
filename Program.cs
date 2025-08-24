@@ -203,7 +203,7 @@ app.UseSwagger();
 app.UseSwaggerUI(options => { options.SwaggerEndpoint("/swagger/v1/swagger.json", "DecalXeAPI v1"); });
 
 // 4. Sử dụng CORS
-app.UseCors("AllowAnyOriginPolicy"); // Sử dụng tên policy bạn đã đặt
+app.UseCors("AllowAnyOriginPolicy"); 
 
 
 // 5. Sử dụng Authentication và Authorization

@@ -7,25 +7,25 @@ data class DecalServiceDto(
     val serviceID: String,
     
     @SerializedName("serviceName")
-    val serviceName: String,
+    val serviceName: String?,
     
     @SerializedName("description")
-    val description: String,
+    val description: String?,
     
     @SerializedName("price")
-    val price: Double,
+    val price: Double?,
     
     @SerializedName("standardWorkUnits")
-    val standardWorkUnits: Int,
+    val standardWorkUnits: Int?,
     
     @SerializedName("decalTemplateID")
-    val decalTemplateID: String,
+    val decalTemplateID: String?,
     
     @SerializedName("decalTemplateName")
-    val decalTemplateName: String,
+    val decalTemplateName: String?,
     
     @SerializedName("decalTypeName")
-    val decalTypeName: String
+    val decalTypeName: String?
 )
 
 data class CreateDecalServiceDto(

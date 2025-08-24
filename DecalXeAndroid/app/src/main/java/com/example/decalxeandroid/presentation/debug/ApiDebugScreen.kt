@@ -12,15 +12,21 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.decalxeandroid.di.AppContainer
 import com.example.decalxeandroid.presentation.vehicles.VehiclesViewModel
+import com.example.decalxeandroid.presentation.services.ServicesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ApiDebugScreen() {
-    val viewModel: VehiclesViewModel = viewModel {
+    val vehiclesViewModel: VehiclesViewModel = viewModel {
         VehiclesViewModel(AppContainer.customerVehicleRepository)
     }
     
-    val uiState by viewModel.uiState.collectAsState()
+    val servicesViewModel: ServicesViewModel = viewModel {
+        ServicesViewModel(AppContainer.decalServiceRepository)
+    }
+    
+    val vehiclesUiState by vehiclesViewModel.uiState.collectAsState()
+    val servicesUiState by servicesViewModel.uiState.collectAsState()
 
     Column(
         modifier = Modifier
@@ -29,7 +35,7 @@ fun ApiDebugScreen() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "API Debug - Customer Vehicles",
+            text = "API Debug - Customer Vehicles & Services",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )
@@ -52,10 +58,37 @@ fun ApiDebugScreen() {
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 Button(
-                    onClick = { viewModel.loadVehicles() },
+                    onClick = { vehiclesViewModel.loadVehicles() },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Test API Call")
+                    Text("Test CustomerVehicles API")
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        // DecalServices API Test Card
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "DecalServices Test",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text("URL: https://decalxesequences-production.up.railway.app/api/DecalServices")
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Button(
+                    onClick = { servicesViewModel.loadServices() },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Test DecalServices API")
                 }
             }
         }
@@ -67,9 +100,9 @@ fun ApiDebugScreen() {
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
                 containerColor = when {
-                    uiState.isLoading -> MaterialTheme.colorScheme.primaryContainer
-                    uiState.error != null -> MaterialTheme.colorScheme.errorContainer
-                    uiState.vehicles.isNotEmpty() -> MaterialTheme.colorScheme.primaryContainer
+                    vehiclesUiState.isLoading || servicesUiState.isLoading -> MaterialTheme.colorScheme.primaryContainer
+                    vehiclesUiState.error != null || servicesUiState.error != null -> MaterialTheme.colorScheme.errorContainer
+                    vehiclesUiState.vehicles.isNotEmpty() || servicesUiState.services.isNotEmpty() -> MaterialTheme.colorScheme.primaryContainer
                     else -> MaterialTheme.colorScheme.surface
                 }
             )
@@ -84,7 +117,7 @@ fun ApiDebugScreen() {
                 )
                 
                 when {
-                    uiState.isLoading -> {
+                    vehiclesUiState.isLoading || servicesUiState.isLoading -> {
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -93,17 +126,33 @@ fun ApiDebugScreen() {
                             Text("Loading...")
                         }
                     }
-                    uiState.error != null -> {
+                    vehiclesUiState.error != null -> {
                         Text(
-                            text = "❌ Error: ${uiState.error}",
+                            text = "❌ Vehicles Error: ${vehiclesUiState.error}",
                             color = MaterialTheme.colorScheme.onErrorContainer
                         )
                     }
-                    uiState.vehicles.isNotEmpty() -> {
+                    servicesUiState.error != null -> {
                         Text(
-                            text = "✅ Success: ${uiState.vehicles.size} vehicles loaded",
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            text = "❌ Services Error: ${servicesUiState.error}",
+                            color = MaterialTheme.colorScheme.onErrorContainer
                         )
+                    }
+                    vehiclesUiState.vehicles.isNotEmpty() || servicesUiState.services.isNotEmpty() -> {
+                        Column {
+                            if (vehiclesUiState.vehicles.isNotEmpty()) {
+                                Text(
+                                    text = "✅ Vehicles: ${vehiclesUiState.vehicles.size} loaded",
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                            if (servicesUiState.services.isNotEmpty()) {
+                                Text(
+                                    text = "✅ Services: ${servicesUiState.services.size} loaded",
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                        }
                     }
                     else -> {
                         Text("Ready to test...")
@@ -115,7 +164,7 @@ fun ApiDebugScreen() {
         Spacer(modifier = Modifier.height(16.dp))
         
         // Results
-        if (uiState.vehicles.isNotEmpty()) {
+        if (vehiclesUiState.vehicles.isNotEmpty() || servicesUiState.services.isNotEmpty()) {
             Card(
                 modifier = Modifier.fillMaxWidth().weight(1f)
             ) {
@@ -123,7 +172,7 @@ fun ApiDebugScreen() {
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
-                        text = "Vehicles (${uiState.vehicles.size})",
+                        text = "Results",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -131,7 +180,19 @@ fun ApiDebugScreen() {
                     Spacer(modifier = Modifier.height(8.dp))
                     
                     LazyColumn {
-                        items(uiState.vehicles) { vehicle ->
+                        // Vehicles section
+                        if (vehiclesUiState.vehicles.isNotEmpty()) {
+                            item {
+                                Text(
+                                    text = "Vehicles (${vehiclesUiState.vehicles.size})",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(vertical = 8.dp)
+                                )
+                            }
+                        }
+                        
+                        items(vehiclesUiState.vehicles) { vehicle ->
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -152,6 +213,42 @@ fun ApiDebugScreen() {
                                     Text("Model: ${vehicle.vehicleModelName ?: "Chưa có thông tin"}")
                                     Text("Brand: ${vehicle.vehicleBrandName ?: "Chưa có thông tin"}")
                                     Text("Customer: ${vehicle.customerID}")
+                                }
+                            }
+                        }
+                        
+                        // Services section
+                        if (servicesUiState.services.isNotEmpty()) {
+                            item {
+                                Text(
+                                    text = "Services (${servicesUiState.services.size})",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(vertical = 8.dp)
+                                )
+                            }
+                        }
+                        
+                        items(servicesUiState.services) { service ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(12.dp)
+                                ) {
+                                    Text(
+                                        text = "ID: ${service.serviceId}",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text("Name: ${service.serviceName}")
+                                    Text("Description: ${service.description ?: "N/A"}")
+                                    Text("Price: ${service.price}đ")
+                                    Text("Work Units: ${service.standardWorkUnits ?: "N/A"}")
+                                    Text("Template: ${service.decalTemplateName ?: "N/A"}")
+                                    Text("Type: ${service.decalTypeName ?: "N/A"}")
                                 }
                             }
                         }
