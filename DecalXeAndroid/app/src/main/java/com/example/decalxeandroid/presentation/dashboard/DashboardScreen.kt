@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.decalxeandroid.presentation.navigation.Screen
 import com.example.decalxeandroid.presentation.customers.CustomersScreen
+import com.example.decalxeandroid.presentation.customers.AddCustomerScreen
 import com.example.decalxeandroid.presentation.orders.OrdersScreen
 import com.example.decalxeandroid.presentation.vehicles.VehiclesScreen
 import com.example.decalxeandroid.presentation.services.ServicesScreen
@@ -231,13 +232,15 @@ fun DashboardNavHost(
         
         // Create/Add screens
         composable(Screen.AddCustomer.route) {
-            // Placeholder screen
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Thêm khách hàng")
-            }
+            AddCustomerScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onCustomerCreated = { customer ->
+                    // Navigate back to customers list
+                    navController.popBackStack()
+                }
+            )
         }
         
         composable(Screen.CreateOrder.route) {
