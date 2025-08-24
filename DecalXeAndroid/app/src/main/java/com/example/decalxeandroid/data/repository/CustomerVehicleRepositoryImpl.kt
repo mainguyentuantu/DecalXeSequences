@@ -21,7 +21,8 @@ class CustomerVehicleRepositoryImpl(
                 val vehicles = response.body()?.map { mapper.toDomain(it) } ?: emptyList()
                 emit(Result.Success(vehicles))
             } else {
-                emit(Result.Error("Failed to fetch vehicles: ${response.code()}"))
+                val errorBody = response.errorBody()?.string()
+                emit(Result.Error("Failed to fetch vehicles: ${response.code()} - $errorBody"))
             }
         } catch (e: Exception) {
             emit(Result.Error("Network error: ${e.message}"))

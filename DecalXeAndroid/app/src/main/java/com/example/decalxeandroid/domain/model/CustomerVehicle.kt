@@ -10,6 +10,6 @@ data class CustomerVehicle(
     val customerID: String,
     val customerFullName: String,
     val modelID: String,
-    val vehicleModelName: String,
-    val vehicleBrandName: String
+    val vehicleModelName: String?,
+    val vehicleBrandName: String?
 )

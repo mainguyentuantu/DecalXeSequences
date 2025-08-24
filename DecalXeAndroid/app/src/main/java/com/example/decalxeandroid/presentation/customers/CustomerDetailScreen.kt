@@ -256,7 +256,7 @@ private fun VehicleItem(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "${vehicle.vehicleModelName} - ${vehicle.vehicleBrandName}",
+                    text = "${vehicle.vehicleModelName ?: "N/A"} - ${vehicle.vehicleBrandName ?: "N/A"}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

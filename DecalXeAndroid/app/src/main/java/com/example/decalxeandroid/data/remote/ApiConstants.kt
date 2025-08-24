@@ -1,7 +1,7 @@
 package com.example.decalxeandroid.data.remote
 
 object ApiConstants {
-    const val BASE_URL = "https://decalxeapi-production.up.railway.app/api/"
+    const val BASE_URL = "https://decalxesequences-production.up.railway.app/api/"
     
     // Auth endpoints
     const val LOGIN_ENDPOINT = "Auth/login"

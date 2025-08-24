@@ -22,6 +22,7 @@ import com.example.decalxeandroid.presentation.orders.OrdersScreen
 import com.example.decalxeandroid.presentation.vehicles.VehiclesScreen
 import com.example.decalxeandroid.presentation.services.ServicesScreen
 import com.example.decalxeandroid.presentation.profile.ProfileScreen
+import com.example.decalxeandroid.presentation.debug.ApiDebugScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,6 +82,11 @@ fun DashboardBottomNavigation(
             route = Screen.Profile.route,
             title = "Hồ sơ",
             icon = Icons.Default.Person
+        ),
+        DashboardBottomNavItem(
+            route = Screen.ApiDebug.route,
+            title = "Debug",
+            icon = Icons.Default.Settings
         )
     )
     
@@ -169,6 +175,9 @@ fun DashboardNavHost(
             ProfileScreen(
                 onNavigateToLogin = onNavigateToLogin
             )
+        }
+        composable(Screen.ApiDebug.route) {
+            ApiDebugScreen()
         }
         
         // Detail screens

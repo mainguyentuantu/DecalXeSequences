@@ -8,21 +8,21 @@ import retrofit2.http.*
 
 interface CustomerVehicleApi {
     
-    @GET("customer-vehicles")
+    @GET("CustomerVehicles")
     suspend fun getCustomerVehicles(): Response<List<CustomerVehicleDto>>
     
-    @GET("customer-vehicles/{id}")
+    @GET("CustomerVehicles/{id}")
     suspend fun getCustomerVehicleById(@Path("id") id: String): Response<CustomerVehicleDto>
     
-    @POST("customer-vehicles")
+    @POST("CustomerVehicles")
     suspend fun createCustomerVehicle(@Body vehicle: CreateCustomerVehicleDto): Response<CustomerVehicleDto>
     
-    @PUT("customer-vehicles/{id}")
+    @PUT("CustomerVehicles/{id}")
     suspend fun updateCustomerVehicle(
         @Path("id") id: String, 
         @Body vehicle: UpdateCustomerVehicleDto
     ): Response<CustomerVehicleDto>
     
-    @DELETE("customer-vehicles/{id}")
+    @DELETE("CustomerVehicles/{id}")
     suspend fun deleteCustomerVehicle(@Path("id") id: String): Response<Unit>
 }

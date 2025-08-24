@@ -22,9 +22,9 @@ data class CustomerVehicleDto(
     @SerializedName("modelID")
     val modelID: String,
     @SerializedName("modelName")
-    val modelName: String,
+    val modelName: String?,
     @SerializedName("brandName")
-    val brandName: String
+    val brandName: String?
 )
 
 data class CreateCustomerVehicleDto(

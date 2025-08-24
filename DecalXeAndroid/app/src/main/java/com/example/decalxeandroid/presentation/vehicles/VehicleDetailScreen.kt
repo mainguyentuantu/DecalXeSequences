@@ -195,7 +195,7 @@ private fun VehicleInfoCard(
             InfoRow(
                 icon = Icons.Default.CarRental,
                 label = "Mẫu xe",
-                value = "${vehicle.vehicleModelName} - ${vehicle.vehicleBrandName}"
+                value = "${vehicle.vehicleModelName ?: "Chưa có thông tin"} - ${vehicle.vehicleBrandName ?: "Chưa có thông tin"}"
             )
             
             // Chassis Number

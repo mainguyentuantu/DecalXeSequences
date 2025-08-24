@@ -22,16 +22,33 @@ import com.example.decalxeandroid.domain.repository.EmployeeRepository
 import com.example.decalxeandroid.domain.repository.OrderRepository
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 
 object AppContainer {
     
     // Base URL for API
-    private const val BASE_URL = "https://decalxeapi-production.up.railway.app/api/"
+    private const val BASE_URL = "https://decalxesequences-production.up.railway.app/api/"
+    
+    // HTTP Logging Interceptor
+    private val loggingInterceptor: HttpLoggingInterceptor by lazy {
+        HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+    }
+    
+    // OkHttp Client
+    private val okHttpClient: OkHttpClient by lazy {
+        OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
+    }
     
     // Retrofit instance
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
