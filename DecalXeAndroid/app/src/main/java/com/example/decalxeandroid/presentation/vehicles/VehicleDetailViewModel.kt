@@ -1,5 +1,6 @@
 package com.example.decalxeandroid.presentation.vehicles
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.decalxeandroid.domain.model.CustomerVehicle
@@ -18,6 +19,10 @@ class VehicleDetailViewModel(
     private val orderRepository: OrderRepository
 ) : ViewModel() {
     
+    companion object {
+        private const val TAG = "VehicleDetailViewModel"
+    }
+    
     private val _uiState = MutableStateFlow<VehicleDetailUiState>(VehicleDetailUiState.Loading)
     val uiState: StateFlow<VehicleDetailUiState> = _uiState.asStateFlow()
     
@@ -27,56 +32,87 @@ class VehicleDetailViewModel(
     
     fun loadVehicle() {
         viewModelScope.launch {
+            Log.d(TAG, "Loading vehicle with ID: $vehicleId")
             _uiState.value = VehicleDetailUiState.Loading
             
             try {
+                // Validate vehicleId first
+                if (vehicleId.isBlank()) {
+                    Log.e(TAG, "Vehicle ID is blank")
+                    _uiState.value = VehicleDetailUiState.Error("ID xe không hợp lệ")
+                    return@launch
+                }
+                
                 // Load vehicle details
+                Log.d(TAG, "Fetching vehicle details from repository")
                 val vehicleResult = customerVehicleRepository.getVehicleById(vehicleId)
                 vehicleResult.collect { result ->
                     when (result) {
                         is com.example.decalxeandroid.domain.model.Result.Success -> {
                             val vehicle = result.data
+                            Log.d(TAG, "Successfully loaded vehicle: ${vehicle.vehicleID} - ${vehicle.licensePlate}")
                             
-                            // Load vehicle orders
-                            val ordersFlow = orderRepository.getOrdersByVehicleId(vehicleId)
-                            ordersFlow.collect { ordersResult ->
-                                when (ordersResult) {
-                                    is com.example.decalxeandroid.domain.model.Result.Success -> {
-                                        val orders = ordersResult.data
-                                        _uiState.value = VehicleDetailUiState.Success(
-                                            vehicle = vehicle,
-                                            orders = orders
-                                        )
-                                    }
-                                    is com.example.decalxeandroid.domain.model.Result.Error -> {
-                                        _uiState.value = VehicleDetailUiState.Error(
-                                            "Không thể tải danh sách đơn hàng: ${ordersResult.message}"
-                                        )
-                                    }
-                                    else -> {
-                                        _uiState.value = VehicleDetailUiState.Error(
-                                            "Kết quả đơn hàng không xác định"
-                                        )
+                            // Load vehicle orders (but don't fail if orders can't be loaded)
+                            try {
+                                Log.d(TAG, "Loading orders for vehicle: ${vehicle.vehicleID}")
+                                val ordersFlow = orderRepository.getOrdersByVehicleId(vehicleId)
+                                ordersFlow.collect { ordersResult ->
+                                    when (ordersResult) {
+                                        is com.example.decalxeandroid.domain.model.Result.Success -> {
+                                            val orders = ordersResult.data
+                                            _uiState.value = VehicleDetailUiState.Success(
+                                                vehicle = vehicle,
+                                                orders = orders
+                                            )
+                                        }
+                                        is com.example.decalxeandroid.domain.model.Result.Error -> {
+                                            // Still show vehicle info even if orders fail to load
+                                            _uiState.value = VehicleDetailUiState.Success(
+                                                vehicle = vehicle,
+                                                orders = emptyList()
+                                            )
+                                        }
+                                        else -> {
+                                            // Still show vehicle info even if orders fail to load
+                                            _uiState.value = VehicleDetailUiState.Success(
+                                                vehicle = vehicle,
+                                                orders = emptyList()
+                                            )
+                                        }
                                     }
                                 }
+                            } catch (e: Exception) {
+                                // Still show vehicle info even if orders fail to load
+                                _uiState.value = VehicleDetailUiState.Success(
+                                    vehicle = vehicle,
+                                    orders = emptyList()
+                                )
                             }
                         }
                         is com.example.decalxeandroid.domain.model.Result.Error -> {
-                            _uiState.value = VehicleDetailUiState.Error(
-                                "Không thể tải thông tin xe: ${result.message}"
-                            )
+                            Log.e(TAG, "Error loading vehicle: ${result.message}")
+                            val errorMessage = when {
+                                result.message.contains("404") -> "Xe không tồn tại hoặc đã bị xóa"
+                                result.message.contains("Network") -> "Lỗi kết nối mạng. Vui lòng kiểm tra kết nối internet"
+                                result.message.contains("timeout") -> "Kết nối bị timeout. Vui lòng thử lại"
+                                else -> "Không thể tải thông tin xe: ${result.message}"
+                            }
+                            _uiState.value = VehicleDetailUiState.Error(errorMessage)
                         }
                         else -> {
                             _uiState.value = VehicleDetailUiState.Error(
-                                "Kết quả xe không xác định"
+                                "Có lỗi không xác định xảy ra. Vui lòng thử lại"
                             )
                         }
                     }
                 }
             } catch (e: Exception) {
-                _uiState.value = VehicleDetailUiState.Error(
-                    "Lỗi không xác định: ${e.message}"
-                )
+                val errorMessage = when {
+                    e.message?.contains("Unable to resolve host") == true -> "Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng"
+                    e.message?.contains("timeout") == true -> "Kết nối bị timeout. Vui lòng thử lại"
+                    else -> "Lỗi không xác định: ${e.message}"
+                }
+                _uiState.value = VehicleDetailUiState.Error(errorMessage)
             }
         }
     }

@@ -44,6 +44,9 @@ fun VehicleDetailScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { viewModel.loadVehicle() }) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Làm mới")
+                    }
                     IconButton(onClick = { viewModel.editVehicle() }) {
                         Icon(Icons.Default.Edit, contentDescription = "Chỉnh sửa")
                     }
@@ -62,7 +65,20 @@ fun VehicleDetailScreen(
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(48.dp),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "Đang tải thông tin xe...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
             is VehicleDetailUiState.Success -> {
@@ -102,21 +118,54 @@ fun VehicleDetailScreen(
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.padding(32.dp)
                     ) {
                         Icon(
                             Icons.Default.Error,
                             contentDescription = null,
-                            tint = Color.Red,
-                            modifier = Modifier.size(48.dp)
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(64.dp)
+                        )
+                        Text(
+                            text = "Không thể tải thông tin xe",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                             text = (uiState as VehicleDetailUiState.Error).message,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color.Red
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
-                        Button(onClick = { viewModel.loadVehicle() }) {
-                            Text("Thử lại")
+                        
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = onNavigateBack
+                            ) {
+                                Icon(
+                                    Icons.Default.ArrowBack,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Quay lại")
+                            }
+                            
+                            Button(
+                                onClick = { viewModel.loadVehicle() }
+                            ) {
+                                Icon(
+                                    Icons.Default.Refresh,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Thử lại")
+                            }
                         }
                     }
                 }
@@ -183,7 +232,7 @@ private fun VehicleInfoCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = vehicle.licensePlate,
+                        text = vehicle.licensePlate.ifEmpty { "Chưa có biển số" },
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
@@ -195,35 +244,41 @@ private fun VehicleInfoCard(
             InfoRow(
                 icon = Icons.Default.CarRental,
                 label = "Mẫu xe",
-                value = "${vehicle.vehicleModelName ?: "Chưa có thông tin"} - ${vehicle.vehicleBrandName ?: "Chưa có thông tin"}"
+                value = when {
+                    !vehicle.vehicleModelName.isNullOrEmpty() && !vehicle.vehicleBrandName.isNullOrEmpty() -> 
+                        "${vehicle.vehicleModelName} - ${vehicle.vehicleBrandName}"
+                    !vehicle.vehicleModelName.isNullOrEmpty() -> vehicle.vehicleModelName
+                    !vehicle.vehicleBrandName.isNullOrEmpty() -> vehicle.vehicleBrandName
+                    else -> "Chưa có thông tin"
+                }
             )
             
             // Chassis Number
             InfoRow(
                 icon = Icons.Default.Numbers,
                 label = "Số khung",
-                value = vehicle.chassisNumber
+                value = vehicle.chassisNumber.ifEmpty { "Chưa có thông tin" }
             )
             
             // Color
             InfoRow(
                 icon = Icons.Default.Palette,
                 label = "Màu sắc",
-                value = vehicle.color
+                value = vehicle.color.ifEmpty { "Chưa có thông tin" }
             )
             
             // Year
             InfoRow(
                 icon = Icons.Default.CalendarToday,
                 label = "Năm sản xuất",
-                value = vehicle.year.toString()
+                value = if (vehicle.year > 0) vehicle.year.toString() else "Chưa có thông tin"
             )
             
             // Initial KM
             InfoRow(
                 icon = Icons.Default.Speed,
                 label = "Số km ban đầu",
-                value = "${vehicle.initialKM} km"
+                value = if (vehicle.initialKM > 0) "${vehicle.initialKM} km" else "Chưa có thông tin"
             )
             
             // Customer Info (Clickable)

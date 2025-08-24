@@ -1,5 +1,6 @@
 package com.example.decalxeandroid.data.repository
 
+import android.util.Log
 import com.example.decalxeandroid.data.api.CustomerVehicleApi
 import com.example.decalxeandroid.data.dto.CustomerVehicleDto
 import com.example.decalxeandroid.data.mapper.CustomerVehicleMapper
@@ -13,6 +14,10 @@ class CustomerVehicleRepositoryImpl(
     private val api: CustomerVehicleApi,
     private val mapper: CustomerVehicleMapper
 ) : CustomerVehicleRepository {
+    
+    companion object {
+        private const val TAG = "CustomerVehicleRepo"
+    }
 
     override fun getVehicles(): Flow<Result<List<CustomerVehicle>>> = flow {
         try {
@@ -31,18 +36,30 @@ class CustomerVehicleRepositoryImpl(
 
     override fun getVehicleById(vehicleId: String): Flow<Result<CustomerVehicle>> = flow {
         try {
+            Log.d(TAG, "Fetching vehicle with ID: $vehicleId")
             val response = api.getCustomerVehicleById(vehicleId)
+            
+            Log.d(TAG, "API Response - Code: ${response.code()}, Success: ${response.isSuccessful}")
+            
             if (response.isSuccessful) {
-                val vehicle = response.body()?.let { mapper.toDomain(it) }
+                val responseBody = response.body()
+                Log.d(TAG, "Response body: $responseBody")
+                
+                val vehicle = responseBody?.let { mapper.toDomain(it) }
                 if (vehicle != null) {
+                    Log.d(TAG, "Successfully mapped vehicle: ${vehicle.vehicleID}")
                     emit(Result.Success(vehicle))
                 } else {
+                    Log.e(TAG, "Vehicle not found or mapping failed")
                     emit(Result.Error("Vehicle not found"))
                 }
             } else {
-                emit(Result.Error("Failed to fetch vehicle: ${response.code()}"))
+                val errorBody = response.errorBody()?.string()
+                Log.e(TAG, "API Error - Code: ${response.code()}, Error: $errorBody")
+                emit(Result.Error("Failed to fetch vehicle: ${response.code()} - $errorBody"))
             }
         } catch (e: Exception) {
+            Log.e(TAG, "Network error", e)
             emit(Result.Error("Network error: ${e.message}"))
         }
     }

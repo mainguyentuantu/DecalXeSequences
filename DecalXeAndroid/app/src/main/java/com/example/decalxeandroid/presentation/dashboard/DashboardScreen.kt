@@ -25,7 +25,9 @@ import com.example.decalxeandroid.presentation.orders.OrderDetailScreen
 import com.example.decalxeandroid.presentation.orders.CreateOrderScreen
 import com.example.decalxeandroid.presentation.vehicles.VehiclesScreen
 import com.example.decalxeandroid.presentation.vehicles.AddVehicleScreen
+import com.example.decalxeandroid.presentation.vehicles.VehicleDetailScreen
 import com.example.decalxeandroid.presentation.services.ServicesScreen
+import com.example.decalxeandroid.presentation.services.CreateServiceScreen
 import com.example.decalxeandroid.presentation.profile.ProfileScreen
 import com.example.decalxeandroid.presentation.debug.ApiDebugScreen
 
@@ -244,13 +246,18 @@ fun DashboardNavHost(
             )
         ) { backStackEntry ->
             val vehicleId = backStackEntry.arguments?.getString("vehicleId") ?: ""
-            // Placeholder screen
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Chi tiết xe: $vehicleId")
-            }
+            VehicleDetailScreen(
+                vehicleId = vehicleId,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToCustomer = { customerId ->
+                    navController.navigate(Screen.CustomerDetail.createRoute(customerId))
+                },
+                onNavigateToOrder = { orderId ->
+                    navController.navigate(Screen.OrderDetail.createRoute(orderId))
+                }
+            )
         }
         
         // Create/Add screens
@@ -291,13 +298,15 @@ fun DashboardNavHost(
         }
         
         composable(Screen.CreateService.route) {
-            // Placeholder screen
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Tạo dịch vụ")
-            }
+            CreateServiceScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onServiceCreated = {
+                    // Navigate back to services list and refresh
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }
