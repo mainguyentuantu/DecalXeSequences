@@ -66,15 +66,25 @@ class CustomerVehicleRepositoryImpl(
 
     override fun getVehiclesByCustomerId(customerId: String): Flow<Result<List<CustomerVehicle>>> = flow {
         try {
-            val response = api.getCustomerVehicles()
+            Log.d(TAG, "Fetching vehicles for customer ID: $customerId")
+            val response = api.getCustomerVehiclesByCustomerId(customerId)
+            
+            Log.d(TAG, "API Response - Code: ${response.code()}, Success: ${response.isSuccessful}")
+            
             if (response.isSuccessful) {
-                val allVehicles = response.body()?.map { mapper.toDomain(it) } ?: emptyList()
-                val customerVehicles = allVehicles.filter { it.customerID == customerId }
-                emit(Result.Success(customerVehicles))
+                val responseBody = response.body()
+                Log.d(TAG, "Response body: $responseBody")
+                
+                val vehicles = responseBody?.map { mapper.toDomain(it) } ?: emptyList()
+                Log.d(TAG, "Successfully mapped ${vehicles.size} vehicles for customer $customerId")
+                emit(Result.Success(vehicles))
             } else {
-                emit(Result.Error("Failed to fetch vehicles: ${response.code()}"))
+                val errorBody = response.errorBody()?.string()
+                Log.e(TAG, "API Error - Code: ${response.code()}, Error: $errorBody")
+                emit(Result.Error("Failed to fetch vehicles: ${response.code()} - $errorBody"))
             }
         } catch (e: Exception) {
+            Log.e(TAG, "Network error", e)
             emit(Result.Error("Network error: ${e.message}"))
         }
     }

@@ -14,6 +14,9 @@ interface OrderApi {
     @GET("Orders/{id}")
     suspend fun getOrderById(@Path("id") id: String): Response<OrderDto>
     
+    @GET("Orders/by-customer/{customerId}")
+    suspend fun getOrdersByCustomerId(@Path("customerId") customerId: String): Response<List<OrderDto>>
+    
     @POST("Orders")
     suspend fun createOrder(@Body order: CreateOrderDto): Response<OrderDto>
     

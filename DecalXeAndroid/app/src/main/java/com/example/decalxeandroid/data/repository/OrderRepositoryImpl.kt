@@ -1,5 +1,6 @@
 package com.example.decalxeandroid.data.repository
 
+import android.util.Log
 import com.example.decalxeandroid.data.remote.OrderApiService
 import com.example.decalxeandroid.data.dto.OrderDto
 import com.example.decalxeandroid.data.mapper.OrderMapper
@@ -83,10 +84,13 @@ class OrderRepositoryImpl(
 
     override fun getOrdersByCustomerId(customerId: String): Flow<Result<List<Order>>> = flow {
         try {
+            Log.d("OrderRepository", "Fetching orders for customer ID: $customerId")
             val orders = api.getOrdersByCustomer(customerId)
             val mappedOrders = orders.map { mapper.toDomain(it) }
+            Log.d("OrderRepository", "Successfully mapped ${mappedOrders.size} orders for customer $customerId")
             emit(Result.Success(mappedOrders))
         } catch (e: Exception) {
+            Log.e("OrderRepository", "Network error fetching orders for customer $customerId", e)
             emit(Result.Error("Network error: ${e.message}"))
         }
     }

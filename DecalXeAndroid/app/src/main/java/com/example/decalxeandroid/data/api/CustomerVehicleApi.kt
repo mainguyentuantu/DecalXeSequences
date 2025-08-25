@@ -14,6 +14,9 @@ interface CustomerVehicleApi {
     @GET("CustomerVehicles/{id}")
     suspend fun getCustomerVehicleById(@Path("id") id: String): Response<CustomerVehicleDto>
     
+    @GET("CustomerVehicles/by-customer/{customerId}")
+    suspend fun getCustomerVehiclesByCustomerId(@Path("customerId") customerId: String): Response<List<CustomerVehicleDto>>
+    
     @POST("CustomerVehicles")
     suspend fun createCustomerVehicle(@Body vehicle: CreateCustomerVehicleDto): Response<CustomerVehicleDto>
     

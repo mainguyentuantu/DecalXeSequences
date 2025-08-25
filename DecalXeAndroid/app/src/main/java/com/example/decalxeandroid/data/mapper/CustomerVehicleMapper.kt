@@ -18,24 +18,24 @@ class CustomerVehicleMapper {
             customerID = dto.customerID,
             customerFullName = dto.customerFullName,
             modelID = dto.modelID,
-            vehicleModelName = dto.modelName,
-            vehicleBrandName = dto.brandName
+            vehicleModelName = dto.vehicleModelName,
+            vehicleBrandName = dto.vehicleBrandName
         )
     }
     
     fun toDto(customerVehicle: CustomerVehicle): CustomerVehicleDto {
         return CustomerVehicleDto(
             vehicleID = customerVehicle.vehicleID,
-            customerID = customerVehicle.customerID,
-            customerFullName = customerVehicle.customerFullName,
             chassisNumber = customerVehicle.chassisNumber,
             licensePlate = customerVehicle.licensePlate.takeIf { it.isNotEmpty() },
             color = customerVehicle.color.takeIf { it.isNotEmpty() },
             year = customerVehicle.year.takeIf { it > 0 },
             initialKM = customerVehicle.initialKM.takeIf { it > 0.0 },
+            customerID = customerVehicle.customerID,
+            customerFullName = customerVehicle.customerFullName,
             modelID = customerVehicle.modelID,
-            modelName = customerVehicle.vehicleModelName,
-            brandName = customerVehicle.vehicleBrandName
+            vehicleModelName = customerVehicle.vehicleModelName,
+            vehicleBrandName = customerVehicle.vehicleBrandName
         )
     }
     

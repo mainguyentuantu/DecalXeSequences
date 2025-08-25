@@ -5,10 +5,6 @@ import com.google.gson.annotations.SerializedName
 data class CustomerVehicleDto(
     @SerializedName("vehicleID")
     val vehicleID: String,
-    @SerializedName("customerID")
-    val customerID: String,
-    @SerializedName("customerFullName")
-    val customerFullName: String,
     @SerializedName("chassisNumber")
     val chassisNumber: String,
     @SerializedName("licensePlate")
@@ -19,12 +15,16 @@ data class CustomerVehicleDto(
     val year: Int?,
     @SerializedName("initialKM")
     val initialKM: Double?,
+    @SerializedName("customerID")
+    val customerID: String,
+    @SerializedName("customerFullName")
+    val customerFullName: String,
     @SerializedName("modelID")
     val modelID: String,
-    @SerializedName("modelName")
-    val modelName: String?,
-    @SerializedName("brandName")
-    val brandName: String?
+    @SerializedName("vehicleModelName")
+    val vehicleModelName: String?,
+    @SerializedName("vehicleBrandName")
+    val vehicleBrandName: String?
 )
 
 data class CreateCustomerVehicleDto(

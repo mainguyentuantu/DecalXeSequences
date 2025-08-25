@@ -9,6 +9,8 @@ data class CustomerDto(
     val firstName: String,
     @SerializedName("lastName")
     val lastName: String,
+    @SerializedName("customerFullName")
+    val customerFullName: String,
     @SerializedName("phoneNumber")
     val phoneNumber: String,
     @SerializedName("email")
@@ -18,7 +20,9 @@ data class CustomerDto(
     @SerializedName("accountID")
     val accountID: String?,
     @SerializedName("accountUsername")
-    val accountUsername: String?
+    val accountUsername: String?,
+    @SerializedName("accountRoleName")
+    val accountRoleName: String?
 )
 
 data class CreateCustomerDto(

@@ -10,7 +10,7 @@ class CustomerMapper {
     fun toDomain(dto: CustomerDto): Customer {
         return Customer(
             customerId = dto.customerID,
-            fullName = "${dto.firstName} ${dto.lastName}",
+            fullName = dto.customerFullName.ifEmpty { "${dto.firstName} ${dto.lastName}" },
             email = dto.email,
             phoneNumber = dto.phoneNumber,
             address = dto.address,
@@ -28,11 +28,13 @@ class CustomerMapper {
             customerID = customer.customerId,
             firstName = nameParts.getOrNull(0) ?: "",
             lastName = nameParts.getOrNull(1) ?: "",
+            customerFullName = customer.fullName,
             phoneNumber = customer.phoneNumber ?: "",
             email = customer.email,
             address = customer.address,
             accountID = null, // Customer doesn't have accountID in domain model
-            accountUsername = null // Customer doesn't have accountUsername in domain model
+            accountUsername = null, // Customer doesn't have accountUsername in domain model
+            accountRoleName = null // Customer doesn't have accountRoleName in domain model
         )
     }
     

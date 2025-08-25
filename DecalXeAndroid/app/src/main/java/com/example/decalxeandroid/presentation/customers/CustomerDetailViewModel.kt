@@ -1,5 +1,6 @@
 package com.example.decalxeandroid.presentation.customers
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.decalxeandroid.domain.model.Customer
@@ -31,66 +32,29 @@ class CustomerDetailViewModel(
     fun loadCustomer() {
         viewModelScope.launch {
             _uiState.value = CustomerDetailUiState.Loading
+            Log.d(TAG, "Loading customer details for ID: $customerId")
             
             try {
                 // Load customer details
+                Log.d(TAG, "Fetching customer data...")
                 val customerResult = customerRepository.getCustomerById(customerId)
                 customerResult.collect { result ->
                     when (result) {
                         is com.example.decalxeandroid.domain.model.Result.Success -> {
                             val customer = result.data
+                            Log.d(TAG, "Successfully loaded customer: ${customer.fullName}")
                             
-                            // Load customer vehicles
-                            val vehiclesFlow = customerVehicleRepository.getVehiclesByCustomerId(customerId)
-                            vehiclesFlow.collect { vehiclesResult ->
-                                when (vehiclesResult) {
-                                    is com.example.decalxeandroid.domain.model.Result.Success -> {
-                                        val vehicles = vehiclesResult.data
-                                        
-                                        // Load customer orders
-                                        val ordersFlow = orderRepository.getOrdersByCustomerId(customerId)
-                                        ordersFlow.collect { ordersResult ->
-                                            when (ordersResult) {
-                                                is com.example.decalxeandroid.domain.model.Result.Success -> {
-                                                    val orders = ordersResult.data
-                                                    _uiState.value = CustomerDetailUiState.Success(
-                                                        customer = customer,
-                                                        vehicles = vehicles,
-                                                        orders = orders
-                                                    )
-                                                }
-                                                is com.example.decalxeandroid.domain.model.Result.Error -> {
-                                                    _uiState.value = CustomerDetailUiState.Error(
-                                                        "Không thể tải danh sách đơn hàng: ${ordersResult.message}"
-                                                    )
-                                                }
-                                                else -> {
-                                                    _uiState.value = CustomerDetailUiState.Error(
-                                                        "Kết quả đơn hàng không xác định"
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                    is com.example.decalxeandroid.domain.model.Result.Error -> {
-                                        _uiState.value = CustomerDetailUiState.Error(
-                                            "Không thể tải danh sách xe: ${vehiclesResult.message}"
-                                        )
-                                    }
-                                    else -> {
-                                        _uiState.value = CustomerDetailUiState.Error(
-                                            "Kết quả xe không xác định"
-                                        )
-                                    }
-                                }
-                            }
+                            // Load customer vehicles and orders concurrently
+                            loadVehiclesAndOrders(customer)
                         }
                         is com.example.decalxeandroid.domain.model.Result.Error -> {
+                            Log.e(TAG, "Failed to load customer: ${result.message}")
                             _uiState.value = CustomerDetailUiState.Error(
                                 "Không thể tải thông tin khách hàng: ${result.message}"
                             )
                         }
                         else -> {
+                            Log.e(TAG, "Unknown customer result type")
                             _uiState.value = CustomerDetailUiState.Error(
                                 "Kết quả khách hàng không xác định"
                             )
@@ -98,11 +62,85 @@ class CustomerDetailViewModel(
                     }
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "Exception loading customer", e)
                 _uiState.value = CustomerDetailUiState.Error(
                     "Lỗi không xác định: ${e.message}"
                 )
             }
         }
+    }
+    
+    private suspend fun loadVehiclesAndOrders(customer: Customer) {
+        var vehicles = emptyList<CustomerVehicle>()
+        var orders = emptyList<Order>()
+        var vehiclesLoaded = false
+        var ordersLoaded = false
+        
+        // Load vehicles
+        val vehiclesFlow = customerVehicleRepository.getVehiclesByCustomerId(customerId)
+        vehiclesFlow.collect { vehiclesResult ->
+            when (vehiclesResult) {
+                is com.example.decalxeandroid.domain.model.Result.Success -> {
+                    vehicles = vehiclesResult.data
+                    vehiclesLoaded = true
+                    Log.d(TAG, "Successfully loaded ${vehicles.size} vehicles for customer")
+                }
+                is com.example.decalxeandroid.domain.model.Result.Error -> {
+                    Log.w(TAG, "Failed to load vehicles: ${vehiclesResult.message}")
+                    vehicles = emptyList()
+                    vehiclesLoaded = true
+                }
+                else -> {
+                    Log.w(TAG, "Unknown vehicles result type")
+                    vehicles = emptyList()
+                    vehiclesLoaded = true
+                }
+            }
+            
+            // Update UI if both are loaded
+            if (vehiclesLoaded && ordersLoaded) {
+                _uiState.value = CustomerDetailUiState.Success(
+                    customer = customer,
+                    vehicles = vehicles,
+                    orders = orders
+                )
+            }
+        }
+        
+        // Load orders
+        val ordersFlow = orderRepository.getOrdersByCustomerId(customerId)
+        ordersFlow.collect { ordersResult ->
+            when (ordersResult) {
+                is com.example.decalxeandroid.domain.model.Result.Success -> {
+                    orders = ordersResult.data
+                    ordersLoaded = true
+                    Log.d(TAG, "Successfully loaded ${orders.size} orders for customer")
+                }
+                is com.example.decalxeandroid.domain.model.Result.Error -> {
+                    Log.w(TAG, "Failed to load orders: ${ordersResult.message}")
+                    orders = emptyList()
+                    ordersLoaded = true
+                }
+                else -> {
+                    Log.w(TAG, "Unknown orders result type")
+                    orders = emptyList()
+                    ordersLoaded = true
+                }
+            }
+            
+            // Update UI if both are loaded
+            if (vehiclesLoaded && ordersLoaded) {
+                _uiState.value = CustomerDetailUiState.Success(
+                    customer = customer,
+                    vehicles = vehicles,
+                    orders = orders
+                )
+            }
+        }
+    }
+    
+    companion object {
+        private const val TAG = "CustomerDetailViewModel"
     }
     
     fun editCustomer() {

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DecalXeAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0ec472473da5333790c3130aea59c309a5c12877")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f8dab60752b71139522eacfe9b01e6cf28f3cdae")]
 [assembly: System.Reflection.AssemblyProductAttribute("DecalXeAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DecalXeAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
