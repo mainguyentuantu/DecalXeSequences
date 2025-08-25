@@ -26,6 +26,12 @@ class VehicleDetailViewModel(
     private val _uiState = MutableStateFlow<VehicleDetailUiState>(VehicleDetailUiState.Loading)
     val uiState: StateFlow<VehicleDetailUiState> = _uiState.asStateFlow()
     
+    private val _showDeleteConfirmDialog = MutableStateFlow(false)
+    val showDeleteConfirmDialog: StateFlow<Boolean> = _showDeleteConfirmDialog.asStateFlow()
+    
+    private val _deleteState = MutableStateFlow<DeleteState>(DeleteState.Idle)
+    val deleteState: StateFlow<DeleteState> = _deleteState.asStateFlow()
+    
     init {
         loadVehicle()
     }
@@ -117,31 +123,66 @@ class VehicleDetailViewModel(
         }
     }
     
-    fun editVehicle() {
-        // TODO: Navigate to edit vehicle screen
+    fun editVehicle(onNavigateToEdit: (String) -> Unit) {
+        Log.d(TAG, "Navigating to edit vehicle: $vehicleId")
+        onNavigateToEdit(vehicleId)
     }
     
-    fun deleteVehicle() {
+    fun showDeleteConfirmDialog() {
+        _showDeleteConfirmDialog.value = true
+    }
+    
+    fun hideDeleteConfirmDialog() {
+        _showDeleteConfirmDialog.value = false
+    }
+    
+    fun deleteVehicle(onNavigateBack: () -> Unit) {
         viewModelScope.launch {
             try {
+                _deleteState.value = DeleteState.Loading
+                _showDeleteConfirmDialog.value = false
+                
+                Log.d(TAG, "Deleting vehicle with ID: $vehicleId")
                 val result = customerVehicleRepository.deleteVehicle(vehicleId)
                 result.collect { deleteResult ->
                     when (deleteResult) {
                         is com.example.decalxeandroid.domain.model.Result.Success -> {
-                            // TODO: Navigate back to vehicles list
+                            Log.d(TAG, "Successfully deleted vehicle: $vehicleId")
+                            _deleteState.value = DeleteState.Success("Đã xóa xe thành công")
+                            // Navigate back after successful deletion
+                            onNavigateBack()
                         }
                         is com.example.decalxeandroid.domain.model.Result.Error -> {
-                            // TODO: Show error message
+                            Log.e(TAG, "Error deleting vehicle: ${deleteResult.message}")
+                            val errorMessage = when {
+                                deleteResult.message.contains("404") -> "Xe không tồn tại hoặc đã bị xóa"
+                                deleteResult.message.contains("Network") -> "Lỗi kết nối mạng. Vui lòng kiểm tra kết nối internet"
+                                deleteResult.message.contains("timeout") -> "Kết nối bị timeout. Vui lòng thử lại"
+                                else -> "Không thể xóa xe: ${deleteResult.message}"
+                            }
+                            _deleteState.value = DeleteState.Error(errorMessage)
                         }
                         else -> {
-                            // TODO: Show error message
+                            _deleteState.value = DeleteState.Error(
+                                "Có lỗi không xác định xảy ra khi xóa xe. Vui lòng thử lại"
+                            )
                         }
                     }
                 }
             } catch (e: Exception) {
-                // TODO: Show error message
+                Log.e(TAG, "Exception while deleting vehicle", e)
+                val errorMessage = when {
+                    e.message?.contains("Unable to resolve host") == true -> "Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng"
+                    e.message?.contains("timeout") == true -> "Kết nối bị timeout. Vui lòng thử lại"
+                    else -> "Lỗi không xác định: ${e.message}"
+                }
+                _deleteState.value = DeleteState.Error(errorMessage)
             }
         }
+    }
+    
+    fun clearDeleteState() {
+        _deleteState.value = DeleteState.Idle
     }
 }
 
@@ -152,4 +193,11 @@ sealed class VehicleDetailUiState {
         val orders: List<Order>
     ) : VehicleDetailUiState()
     data class Error(val message: String) : VehicleDetailUiState()
+}
+
+sealed class DeleteState {
+    object Idle : DeleteState()
+    object Loading : DeleteState()
+    data class Success(val message: String) : DeleteState()
+    data class Error(val message: String) : DeleteState()
 }

@@ -25,6 +25,7 @@ fun OrderDetailScreen(
     onNavigateBack: () -> Unit,
     onNavigateToCustomer: (String) -> Unit,
     onNavigateToVehicle: (String) -> Unit,
+    onNavigateToEdit: (String) -> Unit,
     viewModel: OrderDetailViewModel = viewModel(
         factory = OrderDetailViewModelFactory(
             orderId = orderId,
@@ -44,7 +45,7 @@ fun OrderDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { viewModel.editOrder() }) {
+                    IconButton(onClick = { viewModel.editOrder(onNavigateToEdit) }) {
                         Icon(Icons.Default.Edit, contentDescription = "Chỉnh sửa")
                     }
                     IconButton(onClick = { viewModel.updateOrderStatus() }) {

@@ -24,6 +24,7 @@ fun VehicleDetailScreen(
     onNavigateBack: () -> Unit,
     onNavigateToCustomer: (String) -> Unit,
     onNavigateToOrder: (String) -> Unit,
+    onNavigateToEdit: (String) -> Unit,
     viewModel: VehicleDetailViewModel = viewModel(
         factory = VehicleDetailViewModelFactory(
             vehicleId = vehicleId,
@@ -33,6 +34,8 @@ fun VehicleDetailScreen(
     )
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val showDeleteConfirmDialog by viewModel.showDeleteConfirmDialog.collectAsState()
+    val deleteState by viewModel.deleteState.collectAsState()
     
     Scaffold(
         topBar = {
@@ -47,10 +50,10 @@ fun VehicleDetailScreen(
                     IconButton(onClick = { viewModel.loadVehicle() }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Làm mới")
                     }
-                    IconButton(onClick = { viewModel.editVehicle() }) {
+                    IconButton(onClick = { viewModel.editVehicle(onNavigateToEdit) }) {
                         Icon(Icons.Default.Edit, contentDescription = "Chỉnh sửa")
                     }
-                    IconButton(onClick = { viewModel.deleteVehicle() }) {
+                    IconButton(onClick = { viewModel.showDeleteConfirmDialog() }) {
                         Icon(Icons.Default.Delete, contentDescription = "Xóa", tint = Color.Red)
                     }
                 }
@@ -170,6 +173,55 @@ fun VehicleDetailScreen(
                     }
                 }
             }
+        }
+    }
+    
+    // Delete Confirmation Dialog
+    if (showDeleteConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.hideDeleteConfirmDialog() },
+            title = {
+                Text(
+                    text = "Xác nhận xóa xe",
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text("Bạn có chắc chắn muốn xóa xe này? Hành động này không thể hoàn tác.")
+            },
+            confirmButton = {
+                Button(
+                    onClick = { viewModel.deleteVehicle(onNavigateBack) },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Xóa", color = Color.White)
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { viewModel.hideDeleteConfirmDialog() }
+                ) {
+                    Text("Hủy")
+                }
+            }
+        )
+    }
+    
+    // Handle Delete State
+    LaunchedEffect(deleteState) {
+        when (deleteState) {
+            is com.example.decalxeandroid.presentation.vehicles.DeleteState.Error -> {
+                // Show error snackbar
+                // Note: Ideally we would use SnackbarHost, but for simplicity we'll clear the state
+                viewModel.clearDeleteState()
+            }
+            is com.example.decalxeandroid.presentation.vehicles.DeleteState.Success -> {
+                // Success is handled by navigation back, so we clear the state
+                viewModel.clearDeleteState()
+            }
+            else -> { /* Do nothing */ }
         }
     }
 }

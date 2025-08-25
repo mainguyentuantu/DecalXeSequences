@@ -25,6 +25,9 @@ class CustomerDetailViewModel(
     private val _uiState = MutableStateFlow<CustomerDetailUiState>(CustomerDetailUiState.Loading)
     val uiState: StateFlow<CustomerDetailUiState> = _uiState.asStateFlow()
     
+    private val _deleteState = MutableStateFlow<DeleteCustomerState>(DeleteCustomerState.Idle)
+    val deleteState: StateFlow<DeleteCustomerState> = _deleteState.asStateFlow()
+    
     init {
         loadCustomer()
     }
@@ -143,31 +146,80 @@ class CustomerDetailViewModel(
         private const val TAG = "CustomerDetailViewModel"
     }
     
-    fun editCustomer() {
-        // TODO: Navigate to edit customer screen
+    fun editCustomer(onNavigateToEdit: (String) -> Unit) {
+        Log.d(TAG, "Navigating to edit customer: $customerId")
+        onNavigateToEdit(customerId)
     }
     
-    fun deleteCustomer() {
+    fun showDeleteConfirmation() {
+        _deleteState.value = DeleteCustomerState.ConfirmationRequired
+    }
+    
+    fun dismissDeleteConfirmation() {
+        _deleteState.value = DeleteCustomerState.Idle
+    }
+    
+    fun deleteCustomer(onNavigateBack: () -> Unit) {
         viewModelScope.launch {
+            _deleteState.value = DeleteCustomerState.Deleting
+            Log.d(TAG, "Starting delete process for customer: $customerId")
+            
             try {
-                val result = customerRepository.deleteCustomer(customerId)
-                result.collect { deleteResult ->
+                // First check if customer has related data
+                val currentState = uiState.value
+                if (currentState is CustomerDetailUiState.Success) {
+                    val hasVehicles = currentState.vehicles.isNotEmpty()
+                    val hasOrders = currentState.orders.isNotEmpty()
+                    
+                    if (hasVehicles || hasOrders) {
+                        val conflicts = mutableListOf<String>()
+                        if (hasVehicles) conflicts.add("${currentState.vehicles.size} xe")
+                        if (hasOrders) conflicts.add("${currentState.orders.size} đơn hàng")
+                        
+                        _deleteState.value = DeleteCustomerState.Error(
+                            "Không thể xóa khách hàng vì còn liên kết với: ${conflicts.joinToString(", ")}. " +
+                            "Vui lòng xóa các dữ liệu liên quan trước."
+                        )
+                        return@launch
+                    }
+                }
+                
+                // Proceed with deletion
+                customerRepository.deleteCustomer(customerId).collect { deleteResult ->
                     when (deleteResult) {
                         is com.example.decalxeandroid.domain.model.Result.Success -> {
-                            // TODO: Navigate back to customers list
+                            Log.d(TAG, "Successfully deleted customer: $customerId")
+                            _deleteState.value = DeleteCustomerState.Success
+                            
+                            // Navigate back after a short delay to show success message
+                            kotlinx.coroutines.delay(1500)
+                            onNavigateBack()
                         }
                         is com.example.decalxeandroid.domain.model.Result.Error -> {
-                            // TODO: Show error message
+                            Log.e(TAG, "Failed to delete customer: ${deleteResult.message}")
+                            _deleteState.value = DeleteCustomerState.Error(
+                                "Không thể xóa khách hàng: ${deleteResult.message}"
+                            )
                         }
                         else -> {
-                            // TODO: Show error message
+                            Log.e(TAG, "Unknown result type for delete customer")
+                            _deleteState.value = DeleteCustomerState.Error(
+                                "Lỗi không xác định khi xóa khách hàng"
+                            )
                         }
                     }
                 }
             } catch (e: Exception) {
-                // TODO: Show error message
+                Log.e(TAG, "Exception during delete customer", e)
+                _deleteState.value = DeleteCustomerState.Error(
+                    "Lỗi kết nối: ${e.message}"
+                )
             }
         }
+    }
+    
+    fun resetDeleteState() {
+        _deleteState.value = DeleteCustomerState.Idle
     }
 }
 
@@ -179,4 +231,12 @@ sealed class CustomerDetailUiState {
         val orders: List<Order>
     ) : CustomerDetailUiState()
     data class Error(val message: String) : CustomerDetailUiState()
+}
+
+sealed class DeleteCustomerState {
+    object Idle : DeleteCustomerState()
+    object ConfirmationRequired : DeleteCustomerState()
+    object Deleting : DeleteCustomerState()
+    object Success : DeleteCustomerState()
+    data class Error(val message: String) : DeleteCustomerState()
 }

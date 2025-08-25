@@ -24,6 +24,7 @@ fun CustomerDetailScreen(
     onNavigateBack: () -> Unit,
     onNavigateToVehicle: (String) -> Unit,
     onNavigateToOrder: (String) -> Unit,
+    onNavigateToEdit: (String) -> Unit,
     viewModel: CustomerDetailViewModel = viewModel(
         factory = CustomerDetailViewModelFactory(
             customerId = customerId,
@@ -34,6 +35,7 @@ fun CustomerDetailScreen(
     )
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val deleteState by viewModel.deleteState.collectAsState()
     
     Scaffold(
         topBar = {
@@ -45,10 +47,10 @@ fun CustomerDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { viewModel.editCustomer() }) {
+                    IconButton(onClick = { viewModel.editCustomer(onNavigateToEdit) }) {
                         Icon(Icons.Default.Edit, contentDescription = "Chỉnh sửa")
                     }
-                    IconButton(onClick = { viewModel.deleteCustomer() }) {
+                    IconButton(onClick = { viewModel.showDeleteConfirmation() }) {
                         Icon(Icons.Default.Delete, contentDescription = "Xóa", tint = Color.Red)
                     }
                 }
@@ -128,6 +130,29 @@ fun CustomerDetailScreen(
                     }
                 }
             }
+        }
+        
+        // Delete state handling overlays
+        when (val currentDeleteState = deleteState) {
+            is DeleteCustomerState.ConfirmationRequired -> {
+                DeleteConfirmationDialog(
+                    onConfirm = { viewModel.deleteCustomer(onNavigateBack) },
+                    onDismiss = { viewModel.dismissDeleteConfirmation() }
+                )
+            }
+            is DeleteCustomerState.Deleting -> {
+                DeletingOverlay()
+            }
+            is DeleteCustomerState.Success -> {
+                SuccessOverlay(message = "Khách hàng đã được xóa thành công!")
+            }
+            is DeleteCustomerState.Error -> {
+                ErrorDialog(
+                    message = currentDeleteState.message,
+                    onDismiss = { viewModel.resetDeleteState() }
+                )
+            }
+            else -> {}
         }
     }
 }
@@ -386,4 +411,158 @@ private fun InfoRow(
             )
         }
     }
+}
+
+@Composable
+private fun DeleteConfirmationDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Xác nhận xóa khách hàng",
+                style = MaterialTheme.typography.headlineSmall
+            )
+        },
+        text = {
+            Text(
+                text = "Bạn có chắc chắn muốn xóa khách hàng này? Thao tác này không thể hoàn tác.",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Text("Xóa", color = MaterialTheme.colorScheme.onError)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Hủy")
+            }
+        },
+        icon = {
+            Icon(
+                Icons.Default.Warning,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(32.dp)
+            )
+        }
+    )
+}
+
+@Composable
+private fun DeletingOverlay() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(48.dp),
+                    strokeWidth = 4.dp
+                )
+                Text(
+                    text = "Đang xóa khách hàng...",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = "Vui lòng đợi",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SuccessOverlay(message: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Icon(
+                    Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(64.dp)
+                )
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Text(
+                    text = "Đang chuyển về danh sách...",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ErrorDialog(
+    message: String,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Lỗi xóa khách hàng",
+                style = MaterialTheme.typography.headlineSmall
+            )
+        },
+        text = {
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        },
+        confirmButton = {
+            Button(onClick = onDismiss) {
+                Text("Đóng")
+            }
+        },
+        icon = {
+            Icon(
+                Icons.Default.Error,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(32.dp)
+            )
+        }
+    )
 }

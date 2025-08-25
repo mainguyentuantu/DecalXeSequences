@@ -51,14 +51,11 @@ class CustomerMapper {
     }
     
     fun toUpdateDto(customer: Customer): UpdateCustomerDto {
-        val nameParts = customer.fullName.split(" ", limit = 2)
         return UpdateCustomerDto(
-            firstName = nameParts.getOrNull(0),
-            lastName = nameParts.getOrNull(1),
+            fullName = customer.fullName,
             phoneNumber = customer.phoneNumber,
             email = customer.email,
-            address = customer.address,
-            accountID = null // Customer doesn't have accountID in domain model
+            address = customer.address
         )
     }
 }

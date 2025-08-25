@@ -114,8 +114,9 @@ class OrderDetailViewModel(
         }
     }
     
-    fun editOrder() {
-        // TODO: Navigate to edit order screen
+    fun editOrder(onNavigateToEdit: (String) -> Unit) {
+        android.util.Log.d("OrderDetailViewModel", "Navigating to edit order: $orderId")
+        onNavigateToEdit(orderId)
     }
     
     fun updateOrderStatus() {

@@ -20,12 +20,15 @@ import com.example.decalxeandroid.presentation.navigation.Screen
 import com.example.decalxeandroid.presentation.customers.CustomersScreen
 import com.example.decalxeandroid.presentation.customers.AddCustomerScreen
 import com.example.decalxeandroid.presentation.customers.CustomerDetailScreen
+import com.example.decalxeandroid.presentation.customers.CustomerEditScreen
 import com.example.decalxeandroid.presentation.orders.OrdersScreen
 import com.example.decalxeandroid.presentation.orders.OrderDetailScreen
+import com.example.decalxeandroid.presentation.orders.OrderEditScreen
 import com.example.decalxeandroid.presentation.orders.CreateOrderScreen
 import com.example.decalxeandroid.presentation.vehicles.VehiclesScreen
 import com.example.decalxeandroid.presentation.vehicles.AddVehicleScreen
 import com.example.decalxeandroid.presentation.vehicles.VehicleDetailScreen
+import com.example.decalxeandroid.presentation.vehicles.VehicleEditScreen
 import com.example.decalxeandroid.presentation.services.ServicesScreen
 import com.example.decalxeandroid.presentation.services.CreateServiceScreen
 import com.example.decalxeandroid.presentation.profile.ProfileScreen
@@ -208,6 +211,9 @@ fun DashboardNavHost(
                 },
                 onNavigateToOrder = { orderId ->
                     navController.navigate(Screen.OrderDetail.createRoute(orderId))
+                },
+                onNavigateToEdit = { customerIdToEdit ->
+                    navController.navigate(Screen.CustomerEdit.createRoute(customerIdToEdit))
                 }
             )
         }
@@ -235,6 +241,9 @@ fun DashboardNavHost(
                 },
                 onNavigateToVehicle = { vehicleId ->
                     navController.navigate(Screen.VehicleDetail.createRoute(vehicleId))
+                },
+                onNavigateToEdit = { orderIdToEdit ->
+                    navController.navigate(Screen.OrderEdit.createRoute(orderIdToEdit))
                 }
             )
         }
@@ -256,6 +265,29 @@ fun DashboardNavHost(
                 },
                 onNavigateToOrder = { orderId ->
                     navController.navigate(Screen.OrderDetail.createRoute(orderId))
+                },
+                onNavigateToEdit = { vehicleIdToEdit ->
+                    navController.navigate(Screen.VehicleEdit.createRoute(vehicleIdToEdit))
+                }
+            )
+        }
+        
+        composable(
+            route = Screen.VehicleEdit.route,
+            arguments = listOf(
+                navArgument("vehicleId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val vehicleId = backStackEntry.arguments?.getString("vehicleId") ?: ""
+            VehicleEditScreen(
+                vehicleId = vehicleId,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToDetail = { vehicleIdToDetail ->
+                    navController.navigate(Screen.VehicleDetail.createRoute(vehicleIdToDetail)) {
+                        popUpTo(Screen.VehicleDetail.createRoute(vehicleIdToDetail)) { inclusive = true }
+                    }
                 }
             )
         }
@@ -269,6 +301,46 @@ fun DashboardNavHost(
                 onCustomerCreated = { customer ->
                     // Navigate back to customers list
                     navController.popBackStack()
+                }
+            )
+        }
+        
+        composable(
+            route = Screen.CustomerEdit.route,
+            arguments = listOf(
+                navArgument("customerId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val customerId = backStackEntry.arguments?.getString("customerId") ?: ""
+            CustomerEditScreen(
+                customerId = customerId,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToDetail = { customerIdToDetail ->
+                    navController.navigate(Screen.CustomerDetail.createRoute(customerIdToDetail)) {
+                        popUpTo(Screen.CustomerDetail.createRoute(customerIdToDetail)) { inclusive = true }
+                    }
+                }
+            )
+        }
+        
+        composable(
+            route = Screen.OrderEdit.route,
+            arguments = listOf(
+                navArgument("orderId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val orderId = backStackEntry.arguments?.getString("orderId") ?: ""
+            OrderEditScreen(
+                orderId = orderId,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToDetail = { orderIdToDetail ->
+                    navController.navigate(Screen.OrderDetail.createRoute(orderIdToDetail)) {
+                        popUpTo(Screen.OrderDetail.createRoute(orderIdToDetail)) { inclusive = true }
+                    }
                 }
             )
         }

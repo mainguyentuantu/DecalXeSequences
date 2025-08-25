@@ -41,16 +41,12 @@ data class CreateCustomerDto(
 )
 
 data class UpdateCustomerDto(
-    @SerializedName("firstName")
-    val firstName: String?,
-    @SerializedName("lastName")
-    val lastName: String?,
+    @SerializedName("fullName")
+    val fullName: String?,
     @SerializedName("phoneNumber")
     val phoneNumber: String?,
     @SerializedName("email")
     val email: String?,
     @SerializedName("address")
-    val address: String?,
-    @SerializedName("accountID")
-    val accountID: String?
+    val address: String?
 )
